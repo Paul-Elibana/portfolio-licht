@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Skill;
-use App\Models\Visit;
 use App\Models\User;
 use App\Models\ContactMessage;
 use App\Services\AnalyticsService;
@@ -55,5 +54,11 @@ class PortfolioController extends Controller
         ContactMessage::create($validated);
 
         return response()->json(['success' => true, 'message' => 'Message envoyé avec succès !']);
+    }
+
+    public function carte(): View
+    {
+        $adminUser = User::first();
+        return view('public.carte', compact('adminUser'));
     }
 }

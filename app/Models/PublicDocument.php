@@ -4,22 +4,36 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Modèle pour les documents publics (certifications, diplômes).
- */
 class PublicDocument extends Model
 {
     protected $fillable = [
         'title',
+        'description',
+        'document_path',
+        'type',
+        'tag',
         'issuer',
         'issue_date',
         'expiry_date',
-        'document_path',
-        'description',
     ];
 
     protected $casts = [
-        'issue_date' => 'date',
+        'issue_date'  => 'date',
         'expiry_date' => 'date',
     ];
+
+    public const TYPES = [
+        'hero'          => 'Hero / Bannière',
+        'profil'        => 'Photo de profil',
+        'projet'        => 'Image de projet',
+        'background'    => 'Arrière-plan',
+        'illustration'  => 'Illustration',
+        'certification' => 'Certification / Diplôme',
+        'autre'         => 'Autre',
+    ];
+
+    public function getUrlAttribute(): string
+    {
+        return asset('storage/' . $this->document_path) . '?v=' . ($this->updated_at?->timestamp ?? time());
+    }
 }

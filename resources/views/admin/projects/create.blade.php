@@ -1,53 +1,103 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-10">
-    <div>
-        <h1 class="text-4xl font-bold tracking-tight">Nouveau Projet</h1>
-        <p class="text-slate-400 mt-2 text-sm uppercase tracking-widest">Ajoutez une nouvelle réalisation à votre portfolio</p>
+<div class="max-w-5xl mx-auto space-y-8">
+    <div class="flex items-center gap-4">
+        <a href="{{ route('admin.projects') }}" class="text-slate-500 hover:text-accent-primary transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </a>
+        <div>
+            <h1 class="text-3xl font-bold">Nouveau Projet</h1>
+            <p class="text-slate-400 text-sm mt-1">Ajoutez une nouvelle réalisation à votre portfolio</p>
+        </div>
     </div>
 
-    <x-glass-card :hover="false">
-        <form action="{{ route('admin.projects.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-            @csrf
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Titre du projet</label>
-                    <input type="text" name="title" required class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-colors">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Image (Format image)</label>
-                    <input type="file" name="image_path" class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-2.5 text-white">
-                </div>
-            </div>
+    <div class="grid lg:grid-cols-5 gap-6">
 
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-2">Description</label>
-                <textarea name="description" rows="4" required class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-colors"></textarea>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-slate-300 mb-2">Technologies (séparées par des virgules)</label>
-                <input type="text" name="technologies" placeholder="Ex: Laravel, Tailwind CSS, React" required class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-colors">
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Lien GitHub (URL)</label>
-                    <input type="url" name="github_url" class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-colors">
+        {{-- Apercu image --}}
+        <div class="lg:col-span-2">
+            <x-glass-card :hover="false">
+                <p class="text-xs text-slate-400 uppercase tracking-widest mb-4">Apercu de l'image</p>
+                <div class="relative rounded-xl overflow-hidden aspect-video bg-slate-900 border border-white/5">
+                    <img id="project-preview-img" src="" alt="Apercu" class="hidden w-full h-full object-cover">
+                    <div id="project-preview-placeholder" class="w-full h-full flex flex-col items-center justify-center gap-3 text-slate-700">
+                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <p class="text-xs text-slate-600">Selectionner une image</p>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Lien Live / Démo (URL)</label>
-                    <input type="url" name="live_url" class="w-full bg-slate-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-colors">
-                </div>
-            </div>
+                <p class="text-[10px] text-slate-600 mt-3 leading-relaxed">JPG, PNG, WEBP — Max 5Mo<br>Ratio recommande : 16/9</p>
+            </x-glass-card>
+        </div>
 
-            <div class="flex justify-end pt-6 border-t border-white/5 gap-4">
-                <a href="{{ route('admin.projects') }}" class="px-8 py-3 rounded-xl font-bold border border-white/10 hover:bg-white/5 transition-all">ANNULER</a>
-                <button type="submit" class="neon-btn">CRÉER LE PROJET</button>
-            </div>
-        </form>
-    </x-glass-card>
+        {{-- Formulaire --}}
+        <div class="lg:col-span-3">
+            <x-glass-card :hover="false">
+                <form action="{{ route('admin.projects.store') }}" method="POST" enctype="multipart/form-data" class="space-y-5">
+                    @csrf
+
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Titre du projet *</label>
+                        <input type="text" name="title" value="{{ old('title') }}" required class="contact-input">
+                        @error('title') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Image du projet</label>
+                        <input type="file" name="image_path" id="project-image-input" accept="image/*" class="contact-input cursor-pointer">
+                        @error('image_path') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Description *</label>
+                        <textarea name="description" rows="4" required class="contact-input resize-none">{{ old('description') }}</textarea>
+                        @error('description') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Technologies *</label>
+                        <input type="text" name="technologies" value="{{ old('technologies') }}" placeholder="Laravel, Tailwind CSS, Vue.js..." required class="contact-input">
+                        <p class="text-[10px] text-slate-600 mt-1">Separees par des virgules</p>
+                        @error('technologies') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Lien GitHub</label>
+                            <input type="url" name="github_url" value="{{ old('github_url') }}" placeholder="https://github.com/..." class="contact-input">
+                            @error('github_url') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 uppercase tracking-wide mb-1.5">Lien Live / Demo</label>
+                            <input type="url" name="live_url" value="{{ old('live_url') }}" placeholder="https://..." class="contact-input">
+                            @error('live_url') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between pt-4 border-t border-white/5">
+                        <a href="{{ route('admin.projects') }}" class="ghost-btn text-sm">Annuler</a>
+                        <button type="submit" class="neon-btn text-sm">Creer le projet</button>
+                    </div>
+                </form>
+            </x-glass-card>
+        </div>
+    </div>
 </div>
+
+<script>
+document.getElementById('project-image-input')?.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = document.getElementById('project-preview-img');
+        const placeholder = document.getElementById('project-preview-placeholder');
+        img.src = e.target.result;
+        img.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+});
+</script>
 @endsection

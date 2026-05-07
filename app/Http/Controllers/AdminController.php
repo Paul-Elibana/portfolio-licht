@@ -9,13 +9,17 @@ use App\Models\PublicDocument;
 use App\Models\ContactMessage;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 
 class AdminController extends Controller
 {
+    /* ─── AUTH ─────────────────────────────────────────────── */
+
     public function loginForm(): View|RedirectResponse
     {
         if (Auth::check()) {
@@ -27,20 +31,16 @@ class AdminController extends Controller
     public function authenticate(Request $request): RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        $remember = $request->has('remember');
-
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
             return redirect()->intended('admin/dashboard');
         }
 
-        return back()->withErrors([
-            'email' => 'Identifiants incorrects.',
-        ])->onlyInput('email');
+        return back()->withErrors(['email' => 'Identifiants incorrects.'])->onlyInput('email');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -51,6 +51,8 @@ class AdminController extends Controller
         return redirect('/');
     }
 
+    /* ─── DASHBOARD ─────────────────────────────────────────── */
+
     public function dashboard(AnalyticsService $analytics): View
     {
         $stats = [
@@ -58,6 +60,7 @@ class AdminController extends Controller
             'unique_visitors' => $analytics->getTotalUniqueVisits(),
             'projects_count'  => Project::count(),
             'skills_count'    => Skill::count(),
+            'assets_count'    => PublicDocument::count(),
             'messages_count'  => ContactMessage::count(),
             'unread_messages' => ContactMessage::whereNull('read_at')->count(),
             'recent_messages' => ContactMessage::latest()->take(20)->get(),
@@ -67,10 +70,29 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('stats'));
     }
 
+    public function resetVisits(Request $request): RedirectResponse
+    {
+        Visit::truncate();
+        return back()->with('success', 'Historique des visites réinitialisé.');
+    }
+
+    public function resetMessages(Request $request): RedirectResponse
+    {
+        ContactMessage::truncate();
+        return back()->with('success', 'Messages de contact supprimés.');
+    }
+
+    public function markMessageRead(ContactMessage $message): JsonResponse
+    {
+        $message->update(['read_at' => now()]);
+        return response()->json(['success' => true]);
+    }
+
+    /* ─── PROFIL ────────────────────────────────────────────── */
+
     public function profile(): View
     {
-        $user = Auth::user();
-        return view('admin.profile', compact('user'));
+        return view('admin.profile', ['user' => Auth::user()]);
     }
 
     public function updateProfile(Request $request): RedirectResponse
@@ -78,22 +100,25 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'profile_photo' => ['nullable', 'image', 'max:2048'],
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password'      => ['nullable', 'string', 'min:8', 'confirmed'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
         ]);
 
-        $user->name = $request->name;
+        $user->name  = $request->name;
         $user->email = $request->email;
 
         if ($request->filled('password')) {
-            $user->password = \Illuminate\Support\Facades\Hash::make($request->password);
+            $user->password = Hash::make($request->password);
         }
 
         if ($request->hasFile('profile_photo')) {
-            $path = $request->file('profile_photo')->store('profile-photos', 'public');
-            $user->profile_photo = $path;
+            if ($user->profile_photo) {
+                Storage::disk('public')->delete($user->profile_photo);
+            }
+            $user->profile_photo = $request->file('profile_photo')
+                ->store('profile-photos', 'public');
         }
 
         $user->save();
@@ -101,10 +126,11 @@ class AdminController extends Controller
         return back()->with('success', 'Profil mis à jour avec succès.');
     }
 
+    /* ─── PROJETS ───────────────────────────────────────────── */
+
     public function projects(): View
     {
-        $projects = Project::latest()->get();
-        return view('admin.projects', compact('projects'));
+        return view('admin.projects', ['projects' => Project::latest()->get()]);
     }
 
     public function createProject(): View
@@ -115,24 +141,24 @@ class AdminController extends Controller
     public function storeProject(Request $request): RedirectResponse
     {
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'technologies' => ['required', 'string'], // Sera converti en array
-            'image_path' => ['nullable', 'image', 'max:2048'],
-            'github_url' => ['nullable', 'url'],
-            'live_url' => ['nullable', 'url'],
+            'technologies'=> ['required', 'string'],
+            'image_path'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:3072'],
+            'github_url'  => ['nullable', 'url'],
+            'live_url'    => ['nullable', 'url'],
         ]);
 
-        $project = new Project();
-        $project->title = $request->title;
-        $project->description = $request->description;
-        $project->technologies = array_map('trim', explode(',', $request->technologies));
-        $project->github_url = $request->github_url;
-        $project->live_url = $request->live_url;
+        $project = new Project([
+            'title'        => $request->title,
+            'description'  => $request->description,
+            'technologies' => array_map('trim', explode(',', $request->technologies)),
+            'github_url'   => $request->github_url,
+            'live_url'     => $request->live_url,
+        ]);
 
         if ($request->hasFile('image_path')) {
-            $path = $request->file('image_path')->store('projects', 'public');
-            $project->image_path = $path;
+            $project->image_path = $request->file('image_path')->store('projects', 'public');
         }
 
         $project->save();
@@ -148,23 +174,25 @@ class AdminController extends Controller
     public function updateProject(Request $request, Project $project): RedirectResponse
     {
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'technologies' => ['required', 'string'],
-            'image_path' => ['nullable', 'image', 'max:2048'],
-            'github_url' => ['nullable', 'url'],
-            'live_url' => ['nullable', 'url'],
+            'technologies'=> ['required', 'string'],
+            'image_path'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:3072'],
+            'github_url'  => ['nullable', 'url'],
+            'live_url'    => ['nullable', 'url'],
         ]);
 
-        $project->title = $request->title;
-        $project->description = $request->description;
+        $project->title        = $request->title;
+        $project->description  = $request->description;
         $project->technologies = array_map('trim', explode(',', $request->technologies));
-        $project->github_url = $request->github_url;
-        $project->live_url = $request->live_url;
+        $project->github_url   = $request->github_url;
+        $project->live_url     = $request->live_url;
 
         if ($request->hasFile('image_path')) {
-            $path = $request->file('image_path')->store('projects', 'public');
-            $project->image_path = $path;
+            if ($project->image_path) {
+                Storage::disk('public')->delete($project->image_path);
+            }
+            $project->image_path = $request->file('image_path')->store('projects', 'public');
         }
 
         $project->save();
@@ -174,20 +202,24 @@ class AdminController extends Controller
 
     public function deleteProject(Project $project): RedirectResponse
     {
+        if ($project->image_path) {
+            Storage::disk('public')->delete($project->image_path);
+        }
         $project->delete();
         return back()->with('success', 'Projet supprimé.');
     }
 
+    /* ─── COMPÉTENCES ───────────────────────────────────────── */
+
     public function skills(): View
     {
-        $skills = Skill::all()->groupBy('category');
-        return view('admin.skills', compact('skills'));
+        return view('admin.skills', ['skills' => Skill::all()->groupBy('category')]);
     }
 
     public function storeSkill(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'name'     => ['required', 'string', 'max:255'],
             'category' => ['required', 'string', 'max:255'],
         ]);
 
@@ -202,104 +234,76 @@ class AdminController extends Controller
         return back()->with('success', 'Compétence supprimée.');
     }
 
+    /* ─── ASSETS DU SITE ────────────────────────────────────── */
+
     public function documents(): View
     {
-        $documents = PublicDocument::orderBy('issue_date', 'desc')->get();
-        return view('admin.documents', compact('documents'));
-    }
-
-    public function createDocument(): View
-    {
-        return view('admin.public-documents.create');
+        $assets = PublicDocument::latest()->get();
+        return view('admin.documents', compact('assets'));
     }
 
     public function storeDocument(Request $request): RedirectResponse
     {
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'issuer' => ['nullable', 'string', 'max:255'],
-            'issue_date' => ['nullable', 'date'],
-            'expiry_date' => ['nullable', 'date'],
-            'document_path' => ['required', 'file', 'mimes:pdf,jpg,png,jpeg,gif,svg', 'max:5120'], // Max 5MB
-            'description' => ['nullable', 'string'],
+            'title'         => ['required', 'string', 'max:255'],
+            'description'   => ['nullable', 'string', 'max:1000'],
+            'type'          => ['required', 'string', 'in:' . implode(',', array_keys(PublicDocument::TYPES))],
+            'tag'           => ['nullable', 'string', 'max:100'],
+            'document_path' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg,pdf', 'max:5120'],
         ]);
 
-        $file = $request->file('document_path');
-        $filename = $file->getClientOriginalName();
-        
-        // Gérer les doublons avec un timestamp
-        $path_to_save = 'documents/' . $filename;
-        if (Storage::disk('public')->exists($path_to_save)) {
-            $filename = time() . '_' . $filename;
-            $path_to_save = 'documents/' . $filename;
-        }
-
-        // Stocker dans le disque 'public'
-        $file->storeAs('documents', $filename, 'public');
+        $file     = $request->file('document_path');
+        $filename = time() . '_' . $file->getClientOriginalName();
+        $file->storeAs('assets', $filename, 'public');
 
         PublicDocument::create([
-            'title' => $request->title,
-            'issuer' => $request->issuer,
-            'issue_date' => $request->issue_date,
-            'expiry_date' => $request->expiry_date,
-            'document_path' => $path_to_save,
-            'description' => $request->description,
+            'title'         => $request->title,
+            'description'   => $request->description,
+            'type'          => $request->type,
+            'tag'           => $request->tag,
+            'document_path' => 'assets/' . $filename,
         ]);
 
-        return redirect()->route('admin.documents')->with('success', 'Document public ajouté avec succès.');
+        return back()->with('success', 'Asset ajouté avec succès.');
     }
 
     public function editDocument(PublicDocument $document): View
     {
-        return view('admin.public-documents.edit', compact('document'));
+        return view('admin.documents_edit', compact('document'));
     }
 
     public function updateDocument(Request $request, PublicDocument $document): RedirectResponse
     {
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'issuer' => ['nullable', 'string', 'max:255'],
-            'issue_date' => ['nullable', 'date'],
-            'expiry_date' => ['nullable', 'date'],
-            'document_path' => ['nullable', 'file', 'mimes:pdf,jpg,png,jpeg,gif,svg', 'max:5120'], // Max 5MB
-            'description' => ['nullable', 'string'],
+            'title'         => ['required', 'string', 'max:255'],
+            'description'   => ['nullable', 'string', 'max:1000'],
+            'type'          => ['required', 'string', 'in:' . implode(',', array_keys(PublicDocument::TYPES))],
+            'tag'           => ['nullable', 'string', 'max:100'],
+            'document_path' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,gif,svg,pdf', 'max:5120'],
         ]);
 
-        $document->title = $request->title;
-        $document->issuer = $request->issuer;
-        $document->issue_date = $request->issue_date;
-        $document->expiry_date = $request->expiry_date;
+        $document->title       = $request->title;
         $document->description = $request->description;
+        $document->type        = $request->type;
+        $document->tag         = $request->tag;
 
         if ($request->hasFile('document_path')) {
-            // Supprimer l'ancien fichier si une nouvelle image est uploadée
-            if ($document->document_path) {
-                Storage::disk('public')->delete($document->document_path);
-            }
-            $file = $request->file('document_path');
-            $filename = $file->getClientOriginalName();
-            $path_to_save = 'documents/' . $filename;
-            if (Storage::disk('public')->exists($path_to_save)) {
-                $filename = time() . '_' . $filename;
-                $path_to_save = 'documents/' . $filename;
-            }
-            $file->storeAs('documents', $filename, 'public');
-            $document->document_path = $path_to_save;
+            Storage::disk('public')->delete($document->document_path);
+            $file     = $request->file('document_path');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('assets', $filename, 'public');
+            $document->document_path = 'assets/' . $filename;
         }
 
         $document->save();
 
-        return redirect()->route('admin.documents')->with('success', 'Document public mis à jour.');
+        return redirect()->route('admin.documents')->with('success', 'Asset mis à jour.');
     }
 
-    public function deleteDocument($document_id): RedirectResponse
+    public function deleteDocument(PublicDocument $document): RedirectResponse
     {
-        $document = PublicDocument::findOrFail($document_id);
-        // Supprimer le fichier du disque public
-        if ($document->document_path) {
-            Storage::disk('public')->delete($document->document_path);
-        }
+        Storage::disk('public')->delete($document->document_path);
         $document->delete();
-        return back()->with('success', 'Document public supprimé.');
+        return back()->with('success', 'Asset supprimé.');
     }
 }

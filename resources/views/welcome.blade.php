@@ -7,6 +7,15 @@
     <title>Paul Edwen Elibana Mbadinga — Développeur Full-Stack</title>
     <meta name="description" content="Portfolio de Paul Edwen Elibana Mbadinga, développeur Full-Stack basé à Libreville, Gabon. Spécialisé en Laravel, Vue.js et interfaces futuristes.">
 
+    {{-- Open Graph --}}
+    <meta property="og:title" content="Paul Edwen Elibana Mbadinga — Développeur Full-Stack">
+    <meta property="og:description" content="Portfolio full-stack — Laravel, Vue.js, Tailwind CSS. Disponible pour missions depuis Libreville, Gabon.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="fr_FR">
+
+    {{-- Favicon --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -20,7 +29,7 @@
     <div class="max-w-7xl mx-auto flex justify-between items-center">
 
         {{-- Logo --}}
-        <a href="/" class="text-xl font-bold gradient-text tracking-tighter flex items-center gap-2 shrink-0">
+        <a href="{{ route('login') }}" class="text-xl font-bold gradient-text tracking-tighter flex items-center gap-2 shrink-0">
             <span class="text-accent-primary text-glow">&lt;</span>PE<span class="text-accent-secondary">/</span><span class="text-accent-primary text-glow">&gt;</span>
         </a>
 
@@ -133,7 +142,7 @@
                     <div class="absolute inset-0 bg-accent-primary/20 blur-[80px] rounded-full"></div>
                     <div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden glass border-2 border-white/10">
                         @if($adminUser && $adminUser->profile_photo)
-                            <img src="{{ asset('storage/' . $adminUser->profile_photo) }}"
+                            <img src="{{ asset('storage/' . $adminUser->profile_photo) }}?v={{ $adminUser->updated_at?->timestamp ?? time() }}"
                                  alt="Photo de profil de {{ $adminUser->name }}"
                                  class="w-full h-full object-cover">
                         @else
@@ -631,10 +640,13 @@
                 <span>+</span>
                 <span class="text-slate-400">♥</span>
             </div>
-            <a href="#hero" class="flex items-center gap-1 hover:text-accent-primary transition-colors">
-                Retour en haut
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-            </a>
+            <div class="flex items-center gap-4">
+                <a href="{{ route('carte') }}" class="hover:text-accent-secondary transition-colors">Carte de visite ↗</a>
+                <a href="#hero" class="flex items-center gap-1 hover:text-accent-primary transition-colors">
+                    Retour en haut
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </a>
+            </div>
         </div>
     </div>
 </footer>

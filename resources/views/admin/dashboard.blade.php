@@ -80,13 +80,18 @@
                             <td class="px-5 py-4 text-sm text-slate-300 max-w-[160px] truncate">{{ $msg->subject }}</td>
                             <td class="px-5 py-4 text-xs text-slate-400 max-w-[220px] truncate hidden md:table-cell">{{ $msg->message }}</td>
                             <td class="px-5 py-4 text-xs text-slate-500 font-mono whitespace-nowrap">
-                                {{ $msg->created_at->format('d/m/y H:i') }}
+                                {{ $msg->created_at?->format('d/m/y H:i') ?? '—' }}
                             </td>
                             <td class="px-5 py-4">
                                 @if($msg->read_at)
                                     <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-500 text-xs border border-white/10">Lu</span>
                                 @else
-                                    <span class="px-2 py-0.5 rounded-full bg-accent-primary/15 text-accent-primary text-xs border border-accent-primary/30 font-medium">Nouveau</span>
+                                    <form action="{{ route('messages.read', $msg) }}" method="POST" class="inline">
+                                        @csrf
+                                        <button type="submit" class="px-2 py-0.5 rounded-full bg-accent-primary/15 text-accent-primary text-xs border border-accent-primary/30 font-medium hover:bg-accent-primary/25 transition-colors">
+                                            Nouveau
+                                        </button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
@@ -99,6 +104,35 @@
                     @endforelse
                 </tbody>
             </table>
+        </x-glass-card>
+    </div>
+
+    {{-- Zone de maintenance --}}
+    <div class="space-y-4">
+        <h2 class="text-2xl font-bold">Maintenance</h2>
+        <x-glass-card :hover="false">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="flex-1 p-4 rounded-xl bg-white/3 border border-white/5 space-y-2">
+                    <p class="text-sm font-medium text-slate-200">Réinitialiser les visites</p>
+                    <p class="text-xs text-slate-500">Efface tout l'historique d'analytics. Action irréversible.</p>
+                    <form action="{{ route('reset.visits') }}" method="POST" onsubmit="return confirm('Supprimer definitivement toutes les visites ?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="mt-2 text-xs px-4 py-2 rounded-xl border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all font-medium">
+                            Effacer l'historique
+                        </button>
+                    </form>
+                </div>
+                <div class="flex-1 p-4 rounded-xl bg-white/3 border border-white/5 space-y-2">
+                    <p class="text-sm font-medium text-slate-200">Réinitialiser les messages</p>
+                    <p class="text-xs text-slate-500">Supprime tous les messages de contact reçus.</p>
+                    <form action="{{ route('reset.messages') }}" method="POST" onsubmit="return confirm('Supprimer definitivement tous les messages de contact ?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="mt-2 text-xs px-4 py-2 rounded-xl border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all font-medium">
+                            Effacer les messages
+                        </button>
+                    </form>
+                </div>
+            </div>
         </x-glass-card>
     </div>
 
@@ -121,7 +155,7 @@
                     @forelse($stats['recent_visits']->take(50) as $visit)
                         <tr class="hover:bg-white/5 transition-colors">
                             <td class="px-5 py-3 text-xs font-mono text-slate-400">
-                                {{ $visit->created_at->format('d/m/y H:i') }}
+                                {{ $visit->created_at?->format('d/m/y H:i') ?? '—' }}
                             </td>
                             <td class="px-5 py-3 text-sm text-accent-primary font-mono">{{ $visit->ip_address }}</td>
                             <td class="px-5 py-3 text-xs text-slate-500 truncate max-w-xs hidden md:table-cell">{{ Str::limit($visit->user_agent, 60) }}</td>
