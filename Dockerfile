@@ -1,10 +1,13 @@
 FROM php:8.2-fpm-alpine
 
 # Extensions PHP
-RUN apk add --no-cache nginx supervisor nodejs npm icu-dev \
-        libpng-dev libjpeg-turbo-dev freetype-dev \
+RUN apk add --no-cache nginx supervisor nodejs npm \
+        icu-dev icu-libs \
+        libpng-dev libpng \
+        libjpeg-turbo-dev libjpeg-turbo \
+        freetype-dev freetype \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl gd \
+    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl gd fileinfo \
     && apk del icu-dev libpng-dev libjpeg-turbo-dev freetype-dev
 
 # Composer

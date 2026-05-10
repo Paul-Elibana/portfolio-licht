@@ -94,13 +94,23 @@
 
                 <div class="grid sm:grid-cols-2 gap-4" id="assets-grid">
                     @foreach($assets as $asset)
-                        @php $isImage = in_array(strtolower(pathinfo($asset->document_path, PATHINFO_EXTENSION)), ['jpg','jpeg','png','webp','gif','svg']); @endphp
+                        @php
+                            $ext     = strtolower(pathinfo($asset->document_path, PATHINFO_EXTENSION));
+                            $isImage = in_array($ext, ['jpg','jpeg','png','webp','gif','svg']);
+                            $isPdf   = $ext === 'pdf';
+                        @endphp
                         <div class="asset-item glass rounded-2xl overflow-hidden group transition-all duration-300 hover:border-white/20"
                              data-type="{{ $asset->type }}">
 
-                            <div class="relative aspect-video bg-slate-900">
+                            <div class="relative bg-slate-900" style="height:150px;">
                                 @if($isImage)
                                     <img src="{{ $asset->url }}" alt="{{ $asset->title }}" class="w-full h-full object-cover">
+                                @elseif($isPdf)
+                                    <iframe src="{{ asset('storage/' . $asset->document_path) }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
+                                            class="w-full h-full border-0 pointer-events-none"
+                                            loading="lazy"
+                                            title="{{ $asset->title }}"></iframe>
+                                    <div class="absolute bottom-1 right-1 bg-red-500/20 border border-red-400/30 rounded px-1.5 py-0.5 text-[9px] text-red-400 font-mono">PDF</div>
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
                                         <svg class="w-12 h-12 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,7 +145,7 @@
                             <div class="p-4 space-y-1.5">
                                 <div class="flex items-center justify-between gap-2">
                                     <p class="text-sm font-medium text-slate-200 truncate">{{ $asset->title }}</p>
-                                    <x-badge variant="{{ in_array($asset->type, ['hero','profil']) ? ($asset->type === 'hero' ? 'primary' : 'secondary') : 'neutral' }}">
+                                    <x-badge variant="{{ $asset->type === 'hero' ? 'primary' : 'neutral' }}">
                                         {{ $asset->type }}
                                     </x-badge>
                                 </div>

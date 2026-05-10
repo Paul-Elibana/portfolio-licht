@@ -70,7 +70,14 @@
                              alt="{{ $adminUser->name }}"
                              class="w-full h-full object-cover">
                     @else
-                        <img src="{{ asset('images/default-avatar.svg') }}" alt="Avatar" class="w-full h-full object-cover">
+                        <div class="w-full h-full flex items-center justify-center bg-slate-900">
+                            <svg viewBox="0 0 80 80" width="64" height="64" fill="none">
+                                <circle cx="40" cy="30" r="16" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+                                <circle cx="40" cy="30" r="10" fill="#1e293b"/>
+                                <path d="M8 76c0-17.673 14.327-32 32-32s32 14.327 32 32" stroke="#1e293b" stroke-width="2" stroke-linecap="round" fill="#0f172a"/>
+                                <circle cx="40" cy="30" r="5" fill="#06b6d4" opacity="0.7"/>
+                            </svg>
+                        </div>
                     @endif
                 </div>
                 <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-400 border-2 border-slate-950"></div>

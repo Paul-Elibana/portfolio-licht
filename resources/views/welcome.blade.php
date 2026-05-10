@@ -167,19 +167,18 @@
                     <div class="absolute inset-0 bg-accent-primary/20 blur-[80px] rounded-full"></div>
                     <div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden bg-slate-950 border-2 border-white/10">
                         @if($adminUser && $adminUser->profile_photo)
-                            {{-- ░░ ZONE : photo de profil admin ░░ --}}
                             <img src="{{ asset('storage/' . $adminUser->profile_photo) }}?v={{ $adminUser->updated_at?->timestamp ?? time() }}"
                                  alt="Photo de profil de {{ $adminUser->name }}"
                                  class="w-full h-full object-cover">
-                        @elseif(isset($assets['profil']) && $assets['profil']->first())
-                            {{-- ░░ ZONE ASSET : profil ░░ — Uploader un asset de type "Photo de profil" dans Assets du site --}}
-                            <img src="{{ $assets['profil']->first()->url }}"
-                                 alt="{{ $adminUser->name ?? 'Profil' }}"
-                                 class="w-full h-full object-cover">
                         @else
-                            <img src="{{ asset('images/default-avatar.svg') }}"
-                                 alt="Avatar par défaut"
-                                 class="w-full h-full object-cover">
+                            <div class="w-full h-full flex items-center justify-center bg-slate-900">
+                                <svg viewBox="0 0 80 80" width="120" height="120" fill="none">
+                                    <circle cx="40" cy="30" r="16" fill="#0f172a" stroke="#1e293b" stroke-width="2"/>
+                                    <circle cx="40" cy="30" r="10" fill="#1e293b"/>
+                                    <path d="M8 76c0-17.673 14.327-32 32-32s32 14.327 32 32" stroke="#1e293b" stroke-width="2" stroke-linecap="round" fill="#0f172a"/>
+                                    <circle cx="40" cy="30" r="5" fill="#06b6d4" opacity="0.7"/>
+                                </svg>
+                            </div>
                         @endif
                     </div>
                     {{-- Badge flottant --}}
@@ -415,13 +414,21 @@
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach($assets['certification'] as $i => $cert)
+                @php $certIsPdf = str_ends_with(strtolower($cert->document_path ?? ''), '.pdf'); @endphp
                 <div class="section-reveal" data-delay="{{ $i * 80 }}">
                     <x-glass-card class="flex flex-col gap-4 p-0 overflow-hidden">
-                        <div class="w-full overflow-hidden bg-slate-900">
-                            <img src="{{ $cert->url }}"
-                                 alt="{{ $cert->title ?? 'Certification' }}"
-                                 class="w-full h-44 object-cover hover:scale-105 transition-transform duration-500">
-                        </div>
+                        <a href="{{ asset('storage/' . $cert->document_path) }}" target="_blank" rel="noopener"
+                           class="block w-full overflow-hidden bg-slate-900 relative" style="height:176px;">
+                            @if($certIsPdf)
+                                <canvas class="pdf-thumb w-full h-full"
+                                        data-pdf-src="{{ asset('storage/' . $cert->document_path) }}"></canvas>
+                                <div class="absolute bottom-2 right-2 glass rounded-lg px-2 py-1 text-[10px] text-red-400 font-mono border border-red-400/20">PDF</div>
+                            @else
+                                <img src="{{ $cert->url }}"
+                                     alt="{{ $cert->title ?? 'Certification' }}"
+                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                            @endif
+                        </a>
                         <div class="px-5 pb-5 space-y-1">
                             <p class="text-sm font-semibold text-slate-200">{{ $cert->title ?? 'Certification' }}</p>
                             @if($cert->issuer)
@@ -743,6 +750,33 @@ document.addEventListener('DOMContentLoaded', () => {
     bars.forEach(b => obs.observe(b));
 });
 </script>
+
+@if(isset($assets['certification']) && $assets['certification']->where(fn($c) => str_ends_with(strtolower($c->document_path ?? ''), '.pdf'))->count())
+<script>
+(function() {
+    const canvases = document.querySelectorAll('.pdf-thumb');
+    if (!canvases.length) return;
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        canvases.forEach(canvas => {
+            pdfjsLib.getDocument(canvas.dataset.pdfSrc).promise
+                .then(pdf => pdf.getPage(1))
+                .then(page => {
+                    const vp = page.getViewport({ scale: 1 });
+                    const scale = canvas.parentElement.clientWidth / vp.width;
+                    const scaled = page.getViewport({ scale });
+                    canvas.width  = scaled.width;
+                    canvas.height = scaled.height;
+                    page.render({ canvasContext: canvas.getContext('2d'), viewport: scaled });
+                });
+        });
+    };
+    document.head.appendChild(s);
+})();
+</script>
+@endif
 
 </body>
 </html>

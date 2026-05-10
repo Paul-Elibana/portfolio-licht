@@ -24,8 +24,6 @@ class PublicDocument extends Model
 
     public const TYPES = [
         'hero'          => 'Hero / Bannière',
-        'profil'        => 'Photo de profil',
-        'projet'        => 'Image de projet',
         'background'    => 'Arrière-plan',
         'illustration'  => 'Illustration',
         'certification' => 'Certification / Diplôme',

@@ -108,7 +108,7 @@ class AdminController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'email'             => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password'          => ['nullable', 'string', 'min:8', 'confirmed'],
-            'profile_photo'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'profile_photo'     => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:3072'],
             'public_email'      => ['nullable', 'email', 'max:255'],
             'phone'             => ['nullable', 'string', 'max:50'],
             'github_url'        => ['nullable', 'url', 'max:255'],
@@ -174,7 +174,7 @@ class AdminController extends Controller
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'technologies'=> ['required', 'string'],
-            'image_path'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:3072'],
+            'image_path'  => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:5120'],
             'github_url'  => ['nullable', 'url'],
             'live_url'    => ['nullable', 'url'],
         ]);
@@ -209,7 +209,7 @@ class AdminController extends Controller
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'technologies'=> ['required', 'string'],
-            'image_path'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:3072'],
+            'image_path'  => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:5120'],
             'github_url'  => ['nullable', 'url'],
             'live_url'    => ['nullable', 'url'],
         ]);
