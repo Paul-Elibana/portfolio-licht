@@ -57,7 +57,7 @@
             <div class="text-xs font-mono text-slate-500">
                 <span class="text-accent-primary counter-value" data-target="{{ $stats['views'] }}">0</span> VIEWS
             </div>
-            <a href="#contact" class="neon-btn text-sm py-2 px-5">Me contacter</a>
+            <a href="{{ route('carte') }}" target="_blank" class="neon-btn text-sm py-2 px-5">Me contacter</a>
         </div>
 
         {{-- Hamburger --}}
@@ -134,7 +134,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                         Voir mes projets
                     </a>
-                    <a href="#contact" class="ghost-btn">
+                    <a href="{{ route('carte') }}" target="_blank" class="ghost-btn">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                         Me contacter
                     </a>
@@ -165,7 +165,7 @@
                 </div>
                 <div class="relative avatar-float">
                     <div class="absolute inset-0 bg-accent-primary/20 blur-[80px] rounded-full"></div>
-                    <div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden glass border-2 border-white/10">
+                    <div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden bg-slate-950 border-2 border-white/10">
                         @if($adminUser && $adminUser->profile_photo)
                             {{-- ░░ ZONE : photo de profil admin ░░ --}}
                             <img src="{{ asset('storage/' . $adminUser->profile_photo) }}?v={{ $adminUser->updated_at?->timestamp ?? time() }}"
@@ -177,10 +177,9 @@
                                  alt="{{ $adminUser->name ?? 'Profil' }}"
                                  class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 via-slate-950 to-black">
-                                <div class="text-7xl">👨‍💻</div>
-                                <p class="text-xs text-slate-500 font-mono uppercase tracking-widest">Photo de profil</p>
-                            </div>
+                            <img src="{{ asset('images/default-avatar.svg') }}"
+                                 alt="Avatar par défaut"
+                                 class="w-full h-full object-cover">
                         @endif
                     </div>
                     {{-- Badge flottant --}}

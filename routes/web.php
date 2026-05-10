@@ -28,6 +28,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Profil
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
     Route::post('/profile', [AdminController::class, 'updateProfile'])->name('profile.update');
+    Route::delete('/profile/photo', [AdminController::class, 'deleteProfilePhoto'])->name('profile.photo.delete');
 
     // Projets
     Route::get('/projects', [AdminController::class, 'projects'])->name('projects');

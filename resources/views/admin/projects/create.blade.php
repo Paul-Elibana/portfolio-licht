@@ -86,18 +86,8 @@
 </div>
 
 <script>
-document.getElementById('project-image-input')?.addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        const img = document.getElementById('project-preview-img');
-        const placeholder = document.getElementById('project-preview-placeholder');
-        img.src = e.target.result;
-        img.classList.remove('hidden');
-        placeholder.classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
+document.addEventListener('DOMContentLoaded', () => {
+    initCropperInput('project-image-input', 'project-preview-img', 'project-preview-placeholder', 16/9);
 });
 </script>
 @endsection

@@ -2,8 +2,10 @@ FROM php:8.2-fpm-alpine
 
 # Extensions PHP
 RUN apk add --no-cache nginx supervisor nodejs npm icu-dev \
-    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl \
-    && apk del icu-dev
+        libpng-dev libjpeg-turbo-dev freetype-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl gd \
+    && apk del icu-dev libpng-dev libjpeg-turbo-dev freetype-dev
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

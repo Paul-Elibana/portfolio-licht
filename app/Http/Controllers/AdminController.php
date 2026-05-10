@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Service;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver as GdDriver;
 use App\Models\Skill;
 use App\Models\TimelineEntry;
 use App\Models\Visit;
@@ -131,16 +133,27 @@ class AdminController extends Controller
         }
 
         if ($request->hasFile('profile_photo')) {
-            if ($user->profile_photo) {
-                Storage::disk('public')->delete($user->profile_photo);
-            }
-            $user->profile_photo = $request->file('profile_photo')
-                ->store('profile-photos', 'public');
+            $user->profile_photo = $this->saveImage(
+                $request->file('profile_photo'),
+                'profile-photos', 400, 400,
+                $user->profile_photo
+            );
         }
 
         $user->save();
 
         return back()->with('success', 'Profil mis à jour avec succès.');
+    }
+
+    public function deleteProfilePhoto(): RedirectResponse
+    {
+        $user = Auth::user();
+        if ($user->profile_photo) {
+            Storage::disk('public')->delete($user->profile_photo);
+            $user->profile_photo = null;
+            $user->save();
+        }
+        return back()->with('success', 'Photo de profil supprimée.');
     }
 
     /* ─── PROJETS ───────────────────────────────────────────── */
@@ -175,7 +188,9 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('image_path')) {
-            $project->image_path = $request->file('image_path')->store('projects', 'public');
+            $project->image_path = $this->saveImage(
+                $request->file('image_path'), 'projects', 1200, 675
+            );
         }
 
         $project->save();
@@ -206,10 +221,10 @@ class AdminController extends Controller
         $project->live_url     = $request->live_url;
 
         if ($request->hasFile('image_path')) {
-            if ($project->image_path) {
-                Storage::disk('public')->delete($project->image_path);
-            }
-            $project->image_path = $request->file('image_path')->store('projects', 'public');
+            $project->image_path = $this->saveImage(
+                $request->file('image_path'), 'projects', 1200, 675,
+                $project->image_path
+            );
         }
 
         $project->save();
@@ -398,6 +413,24 @@ class AdminController extends Controller
     {
         $entry->delete();
         return back()->with('success', 'Entrée supprimée du parcours.');
+    }
+
+    /* ─── IMAGE HELPER ─────────────────────────────────────── */
+
+    private function saveImage(\Illuminate\Http\UploadedFile $file, string $folder, int $width, int $height, ?string $existing = null): string
+    {
+        if ($existing) {
+            Storage::disk('public')->delete($existing);
+        }
+
+        $filename = $folder . '/' . uniqid() . '.webp';
+        $manager  = new ImageManager(new GdDriver());
+        $image    = $manager->read($file->getRealPath());
+        $image->cover($width, $height);
+
+        Storage::disk('public')->put($filename, $image->toWebp(85));
+
+        return $filename;
     }
 
     /* ─── SERVICES ──────────────────────────────────────────── */

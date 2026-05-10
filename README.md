@@ -2,37 +2,79 @@
 
 Portfolio personnel de **Paul Edwen Elibana Mbadinga**, développeur Full-Stack basé à Libreville, Gabon.
 
-**Stack :** Laravel 12 · PHP 8.2 · Tailwind CSS v4 · Vite · MySQL · Blade
-
 ---
 
-## Démo en ligne
+## Stack technique complète
 
-**URL :** `https://portfolio-licht-production.up.railway.app`
-**Admin :** `/login` → `paoloedwen@gmail.com`
+### Back-end
+| Technologie | Rôle | Pourquoi |
+|---|---|---|
+| **Laravel 12** | Framework PHP principal | Structure MVC, routing, ORM Eloquent, middleware, validations — productivité maximale |
+| **PHP 8.2** | Langage serveur | Typage strict, performance améliorée (JIT), fibers, enums |
+| **MySQL** | Base de données relationnelle | Gestion des projets, compétences, messages, timeline, services, visites |
+| **Eloquent ORM** | Abstraction base de données | Requêtes lisibles, relations, casts automatiques (JSON, boolean) |
+| **Laravel Blade** | Moteur de templates | Composants réutilisables (`x-badge`, `x-glass-card`), directives `@foreach`, `@if` |
+| **Intervention Image 3** | Traitement d'images PHP | Redimensionnement, recadrage, conversion WebP côté serveur après upload |
+
+### Front-end
+| Technologie | Rôle | Pourquoi |
+|---|---|---|
+| **Tailwind CSS v4** | Utility-first CSS | Rapidité de prototypage, design system cohérent, dark theme natif |
+| **Vite** | Bundler / build tool | HMR ultrarapide en dev, chunks optimisés en prod, intégration Laravel native |
+| **Vanilla JS** | Interactions UI | Particles canvas, typing effect, scroll reveal, filtres projets — sans framework lourd |
+| **Cropper.js 1.6** | Recadrage d'images interactif | Modal de recadrage côté client avant upload (profil, projets) — aucun aller-serveur inutile |
+| **SortableJS** | Drag-and-drop | Réorganisation de la timeline et des entrées de parcours dans l'admin |
+| **QRCode.js** | Génération QR Code | QR code dynamique sur la carte de visite pointant vers le portfolio |
+
+### Infrastructure & déploiement
+| Technologie | Rôle | Pourquoi |
+|---|---|---|
+| **Railway.app** | Hébergement cloud | Déploiement automatique depuis GitHub, base MySQL incluse, HTTPS gratuit |
+| **Docker** (php:8.2-fpm-alpine) | Containerisation | Environnement reproductible, image légère (~150 Mo), build isolé |
+| **Nginx** | Serveur web | Sert les assets statiques directement (×10 plus rapide que `php artisan serve`) |
+| **PHP-FPM** | Process manager PHP | Gestion des workers PHP, performances en production |
+| **Supervisor** | Gestionnaire de processus | Maintient nginx + php-fpm actifs et les redémarre automatiquement |
+| **Composer** | Gestionnaire de dépendances PHP | Autoload PSR-4, packages Laravel/Intervention |
+| **npm** | Gestionnaire de dépendances JS | Build Tailwind + Vite en production |
+
+### Extensions PHP compilées
+| Extension | Utilité |
+|---|---|
+| `pdo` + `pdo_mysql` | Connexion MySQL via PDO |
+| `gd` | Traitement d'images (Intervention Image) |
+| `intl` | Internationalisation, formatage des nombres/dates |
+| `bcmath` | Calculs précis (analytics, compteurs) |
+| `opcache` | Cache du bytecode PHP — performances production |
+
+### Services externes
+| Service | Rôle |
+|---|---|
+| **Gmail SMTP** (App Password) | Notifications email à la réception d'un message de contact |
+| **Cloudflare CDN** (via Railway) | Cache et compression automatiques |
 
 ---
 
 ## Fonctionnalités
 
-### Portfolio public
-- Hero animé (canvas particles, typing effect, avatar flottant)
-- Section À propos + valeurs
-- Timeline Parcours (formations & expériences dynamiques)
-- Compétences avec barres de progression animées
-- Projets avec filtres par technologie
-- Services proposés
-- Formulaire de contact (stockage DB + notification email optionnelle)
-- Carte de visite imprimable (`/carte`)
+### Portfolio public (`/`)
+- Hero animé : canvas particles vanilla JS, typing effect, avatar flottant
+- Section À propos : bio, valeurs, compteurs animés
+- Timeline Parcours : formations & expériences depuis la DB, drag-and-drop dans l'admin
+- Compétences : barres de progression animées au scroll (Intersection Observer)
+- Projets : filtre JS par technologie, cards avec overlay et liens
+- Services : gestion complète depuis l'admin
+- Formulaire de contact : stockage DB + notification Gmail optionnelle
+- Carte de visite imprimable (`/carte`) avec QR code
 
-### Dashboard admin
-- Statistiques visiteurs (vues totales, visiteurs uniques)
-- **Profil** : photo, coordonnées publiques (email, téléphone, GitHub, LinkedIn, localisation), statut de disponibilité éditable
-- **Projets** : CRUD complet avec upload image et prévisualisation instantanée
+### Dashboard admin (`/admin`)
+- **Tableau de bord** : stats visiteurs, messages non lus, accès rapides
+- **Profil** : photo (avec recadrage Cropper.js), coordonnées publiques, statut de disponibilité
+- **Projets** : CRUD + upload image avec recadrage 16:9
 - **Compétences** : ajout/suppression, niveau (%) modifiable par slider
-- **Parcours** : CRUD formations & expériences, réorganisation par drag-and-drop
+- **Parcours** : CRUD formations & expériences, réorganisation drag-and-drop
+- **Services** : CRUD complet avec icône SVG, couleur, tags
 - **Assets du site** : images hero, profil, illustration, background, certifications
-- **Messages** : liste avec aperçu modal au clic, marquer comme lu
+- **Messages** : liste avec aperçu modal, marquer comme lu
 - **Maintenance** : reset visites / messages
 
 ---
@@ -100,22 +142,37 @@ MAIL_FROM_NAME=HubFolio
 ```
 app/
 ├── Http/Controllers/
-│   ├── AdminController.php      CRUD admin complet
-│   └── PortfolioController.php  Pages publiques
+│   ├── AdminController.php      CRUD admin complet + traitement images
+│   └── PortfolioController.php  Pages publiques + envoi contact
 ├── Mail/
 │   └── NewContactMessage.php    Notification email contact
 ├── Models/
 │   ├── User.php                 + coordonnées publiques + disponibilité
 │   ├── Skill.php                + level (%)
-│   ├── TimelineEntry.php        Parcours
-│   ├── ContactMessage.php
-│   └── PublicDocument.php       Assets (hero, profil, background, certification...)
+│   ├── TimelineEntry.php        Parcours (formations/expériences)
+│   ├── Service.php              Services proposés
+│   ├── ContactMessage.php       Messages reçus via formulaire
+│   └── PublicDocument.php       Assets (hero, profil, background...)
+├── Services/
+│   └── AnalyticsService.php     Tracking visites uniques
 docker/
-├── nginx.conf / supervisord.conf / start.sh
+├── nginx.conf                   Assets statiques servis directement
+├── supervisord.conf             nginx + php-fpm supervisés
+└── start.sh                     migrate/seed + démarrage serveurs
+public/
+└── images/default-avatar.svg    Avatar par défaut (affiché si aucune photo uploadée)
 resources/views/
-├── welcome.blade.php            Portfolio public
+├── welcome.blade.php            Portfolio public (toutes sections)
+├── public/carte.blade.php       Carte de visite imprimable
 ├── admin/
-│   ├── dashboard / profile / skills / projects
-│   └── timeline/  (index / create / edit)
-└── emails/contact-notification.blade.php
+│   ├── dashboard/profile/skills/projects/services
+│   └── timeline/ (index/create/edit)
+└── layouts/admin.blade.php      Layout admin + modal Cropper.js
 ```
+
+---
+
+## Démo
+
+**URL :** `https://portfolio-licht-production.up.railway.app`
+**Admin :** `/login` → `paoloedwen@gmail.com`

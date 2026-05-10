@@ -9,17 +9,28 @@
     @vite(['resources/css/app.css'])
     <style>
         @media print {
-            body { background: white !important; }
-            .no-print { display: none !important; }
-            .card-print {
-                box-shadow: none !important;
-                border: 1px solid #e2e8f0 !important;
-                background: white !important;
-                color: #1e293b !important;
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { margin: 8mm; size: A4 portrait; }
+
+            body {
+                background: #020617 !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                min-height: 100vh !important;
             }
-            .card-print * { color: #1e293b !important; }
-            .card-print .text-accent-primary,
-            .card-print .gradient-text { color: #0891b2 !important; }
+
+            .no-print { display: none !important; }
+
+            .card-print {
+                background: rgba(255,255,255,0.05) !important;
+                border: 1px solid rgba(255,255,255,0.1) !important;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.37) !important;
+                break-inside: avoid !important;
+            }
+
+            /* Forcer les backgrounds gradients */
+            [style*="background"] { background: attr(style) !important; }
         }
     </style>
 </head>
@@ -59,14 +70,7 @@
                              alt="{{ $adminUser->name }}"
                              class="w-full h-full object-cover">
                     @else
-                        <div class="w-full h-full flex items-center justify-center bg-slate-900">
-                            <svg viewBox="0 0 80 80" width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="40" cy="30" r="16" fill="#1e293b" stroke="#334155" stroke-width="2"/>
-                                <circle cx="40" cy="30" r="10" fill="#334155"/>
-                                <path d="M12 72c0-15.464 12.536-28 28-28s28 12.536 28 28" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="#1e293b"/>
-                                <circle cx="40" cy="30" r="5" fill="#06b6d4" opacity="0.7"/>
-                            </svg>
-                        </div>
+                        <img src="{{ asset('images/default-avatar.svg') }}" alt="Avatar" class="w-full h-full object-cover">
                     @endif
                 </div>
                 <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-green-400 border-2 border-slate-950"></div>

@@ -7,6 +7,8 @@
     <title>Admin — HubFolio</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js" defer></script>
 </head>
 <body class="min-h-screen">
 
@@ -89,5 +91,114 @@
     </main>
 </div>
 
+{{-- ── Modal Cropper ────────────────────────────────────────── --}}
+<div id="cropper-modal" class="fixed inset-0 z-[9999] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="glass border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <h3 class="font-semibold text-slate-200 text-sm">Recadrer l'image</h3>
+            <button id="cropper-cancel" class="text-slate-500 hover:text-slate-200 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="p-4 bg-slate-950">
+            <div class="max-h-[60vh] overflow-hidden flex items-center justify-center">
+                <img id="cropper-img" src="" alt="Recadrage" class="max-w-full block">
+            </div>
+        </div>
+        <div class="flex items-center justify-between px-6 py-4 border-t border-white/10 gap-4 flex-wrap">
+            <div class="flex gap-2">
+                <button data-ratio="free"  class="cropper-ratio-btn px-3 py-1.5 text-xs rounded-lg border border-white/10 text-slate-400 hover:border-accent-primary/40 hover:text-accent-primary transition-all">Libre</button>
+                <button data-ratio="1"     class="cropper-ratio-btn px-3 py-1.5 text-xs rounded-lg border border-white/10 text-slate-400 hover:border-accent-primary/40 hover:text-accent-primary transition-all">1:1</button>
+                <button data-ratio="1.777" class="cropper-ratio-btn px-3 py-1.5 text-xs rounded-lg border border-white/10 text-slate-400 hover:border-accent-primary/40 hover:text-accent-primary transition-all">16:9</button>
+                <button data-ratio="1.333" class="cropper-ratio-btn px-3 py-1.5 text-xs rounded-lg border border-white/10 text-slate-400 hover:border-accent-primary/40 hover:text-accent-primary transition-all">4:3</button>
+            </div>
+            <button id="cropper-confirm" class="neon-btn text-xs py-2 px-5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                Valider le recadrage
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    let cropper = null;
+    let currentInput = null;
+    let currentPreview = null;
+    let currentPlaceholder = null;
+
+    window.initCropperInput = function (inputId, previewId, placeholderId, defaultRatio) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        input.addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+            currentInput = input;
+            currentPreview    = previewId     ? document.getElementById(previewId)     : null;
+            currentPlaceholder = placeholderId ? document.getElementById(placeholderId) : null;
+            const reader = new FileReader();
+            reader.onload = e => openCropper(e.target.result, defaultRatio ?? NaN);
+            reader.readAsDataURL(file);
+            this.value = '';
+        });
+    };
+
+    function openCropper(src, ratio) {
+        const modal = document.getElementById('cropper-modal');
+        const img   = document.getElementById('cropper-img');
+        img.src = src;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (cropper) { cropper.destroy(); cropper = null; }
+        setTimeout(() => {
+            cropper = new Cropper(img, {
+                aspectRatio: ratio,
+                viewMode: 1,
+                autoCropArea: 0.9,
+                responsive: true,
+                background: false,
+            });
+        }, 80);
+    }
+
+    function closeCropper() {
+        const modal = document.getElementById('cropper-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        if (cropper) { cropper.destroy(); cropper = null; }
+    }
+
+    document.getElementById('cropper-cancel')?.addEventListener('click', closeCropper);
+
+    document.querySelectorAll('.cropper-ratio-btn').forEach(btn =>
+        btn.addEventListener('click', () => {
+            if (!cropper) return;
+            const r = btn.dataset.ratio;
+            cropper.setAspectRatio(r === 'free' ? NaN : parseFloat(r));
+        })
+    );
+
+    document.getElementById('cropper-confirm')?.addEventListener('click', () => {
+        if (!cropper || !currentInput) return;
+        cropper.getCroppedCanvas({ maxWidth: 1400, imageSmoothingQuality: 'high' })
+            .toBlob(blob => {
+                const file = new File([blob], 'cropped_' + Date.now() + '.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                currentInput.files = dt.files;
+                if (currentPreview) {
+                    currentPreview.src = URL.createObjectURL(blob);
+                    currentPreview.classList.remove('hidden');
+                }
+                if (currentPlaceholder) currentPlaceholder.classList.add('hidden');
+                closeCropper();
+            }, 'image/jpeg', 0.9);
+    });
+})();
+</script>
 </body>
 </html>

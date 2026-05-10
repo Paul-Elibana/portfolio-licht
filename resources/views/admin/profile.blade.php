@@ -54,9 +54,21 @@
                             </svg>
                             <span class="text-[10px] text-white">Changer</span>
                         </label>
-                        <input type="file" id="profile_photo" name="profile_photo" class="hidden" accept="image/*">
+                        <input type="file" id="profile_photo" name="profile_photo" class="hidden" accept="image/*"
+               data-cropper-preview="profile-preview"
+               data-cropper-placeholder="profile-placeholder"
+               data-cropper-ratio="1">
                     </div>
                     <p class="text-[10px] text-slate-600 leading-relaxed">JPG, PNG, WEBP · Max 3 Mo</p>
+                    @if($user->profile_photo)
+                        <form action="{{ route('admin.profile.photo.delete') }}" method="POST"
+                              onsubmit="return confirm('Supprimer la photo de profil ?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="text-[10px] text-red-400 hover:text-red-300 transition-colors underline">
+                                Supprimer la photo
+                            </button>
+                        </form>
+                    @endif
                     @error('profile_photo') <p class="text-red-400 text-xs">{{ $message }}</p> @enderror
                 </div>
 
@@ -171,16 +183,8 @@
 </div>
 
 <script>
-document.getElementById('profile_photo')?.addEventListener('change', function() {
-    const file = this.files[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-        document.getElementById('profile-preview').src = e.target.result;
-        document.getElementById('profile-preview').classList.remove('hidden');
-        document.getElementById('profile-placeholder').classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
+document.addEventListener('DOMContentLoaded', () => {
+    initCropperInput('profile_photo', 'profile-preview', 'profile-placeholder', 1);
 });
 </script>
 @endsection
