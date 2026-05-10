@@ -28,8 +28,13 @@
                                  alt="Photo"
                                  class="{{ $user->profile_photo ? 'block' : 'hidden' }} w-full h-full object-cover">
                             <div id="profile-placeholder"
-                                 class="{{ $user->profile_photo ? 'hidden' : 'flex' }} w-full h-full items-center justify-center text-4xl font-bold text-slate-700 uppercase">
-                                {{ substr($user->name, 0, 2) }}
+                                 class="{{ $user->profile_photo ? 'hidden' : 'flex' }} w-full h-full items-center justify-center bg-slate-900">
+                                <svg viewBox="0 0 80 80" width="80" height="80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="40" cy="30" r="16" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+                                    <circle cx="40" cy="30" r="10" fill="#334155"/>
+                                    <path d="M12 72c0-15.464 12.536-28 28-28s28 12.536 28 28" stroke="#334155" stroke-width="2" stroke-linecap="round" fill="#1e293b"/>
+                                    <circle cx="40" cy="30" r="5" fill="#06b6d4" opacity="0.6"/>
+                                </svg>
                             </div>
                         </div>
                         <label for="profile_photo"

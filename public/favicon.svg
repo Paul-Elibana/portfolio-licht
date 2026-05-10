@@ -1,4 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="8" fill="#0f172a"/>
-  <text x="16" y="22" font-family="monospace" font-weight="700" font-size="14" text-anchor="middle" fill="#06b6d4">&lt;PE/&gt;</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- fond arrondi -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- accent top-right -->
+  <circle cx="56" cy="8" r="12" fill="#06b6d4" opacity="0.15"/>
+  <!-- accent bottom-left -->
+  <circle cx="8" cy="56" r="10" fill="#8b5cf6" opacity="0.12"/>
+  <!-- crochet gauche < -->
+  <polyline points="14,22 8,32 14,42" stroke="#06b6d4" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- crochet droit > -->
+  <polyline points="50,22 56,32 50,42" stroke="#8b5cf6" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <!-- slash / -->
+  <line x1="38" y1="20" x2="26" y2="44" stroke="url(#glow)" stroke-width="3" stroke-linecap="round"/>
 </svg>

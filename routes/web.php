@@ -34,7 +34,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/projects/create', [AdminController::class, 'createProject'])->name('projects.create');
     Route::post('/projects', [AdminController::class, 'storeProject'])->name('projects.store');
     Route::get('/projects/{project}/edit', [AdminController::class, 'editProject'])->name('projects.edit');
-    Route::post('/projects/{project}', [AdminController::class, 'updateProject'])->name('projects.update');
+    Route::put('/projects/{project}', [AdminController::class, 'updateProject'])->name('projects.update');
     Route::delete('/projects/{project}', [AdminController::class, 'deleteProject'])->name('projects.delete');
 
     // Compétences

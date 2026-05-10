@@ -86,7 +86,7 @@
                                 @if($msg->read_at)
                                     <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-500 text-xs border border-white/10">Lu</span>
                                 @else
-                                    <form action="{{ route('messages.read', $msg) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.messages.read', $msg) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" class="px-2 py-0.5 rounded-full bg-accent-primary/15 text-accent-primary text-xs border border-accent-primary/30 font-medium hover:bg-accent-primary/25 transition-colors">
                                             Nouveau
@@ -115,7 +115,7 @@
                 <div class="flex-1 p-4 rounded-xl bg-white/3 border border-white/5 space-y-2">
                     <p class="text-sm font-medium text-slate-200">Réinitialiser les visites</p>
                     <p class="text-xs text-slate-500">Efface tout l'historique d'analytics. Action irréversible.</p>
-                    <form action="{{ route('reset.visits') }}" method="POST" onsubmit="return confirm('Supprimer definitivement toutes les visites ?')">
+                    <form action="{{ route('admin.reset.visits') }}" method="POST" onsubmit="return confirm('Supprimer definitivement toutes les visites ?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="mt-2 text-xs px-4 py-2 rounded-xl border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all font-medium">
                             Effacer l'historique
@@ -125,7 +125,7 @@
                 <div class="flex-1 p-4 rounded-xl bg-white/3 border border-white/5 space-y-2">
                     <p class="text-sm font-medium text-slate-200">Réinitialiser les messages</p>
                     <p class="text-xs text-slate-500">Supprime tous les messages de contact reçus.</p>
-                    <form action="{{ route('reset.messages') }}" method="POST" onsubmit="return confirm('Supprimer definitivement tous les messages de contact ?')">
+                    <form action="{{ route('admin.reset.messages') }}" method="POST" onsubmit="return confirm('Supprimer definitivement tous les messages de contact ?')">
                         @csrf @method('DELETE')
                         <button type="submit" class="mt-2 text-xs px-4 py-2 rounded-xl border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all font-medium">
                             Effacer les messages
