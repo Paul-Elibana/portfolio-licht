@@ -751,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-@if(isset($assets['certification']) && $assets['certification']->where(fn($c) => str_ends_with(strtolower($c->document_path ?? ''), '.pdf'))->count())
+@if(isset($assets['certification']) && $assets['certification']->filter(fn($c) => str_ends_with(strtolower($c->document_path ?? ''), '.pdf'))->count())
 <script>
 (function() {
     const canvases = document.querySelectorAll('.pdf-thumb');
