@@ -75,8 +75,17 @@
     {{-- ══════════════════════════ HERO ══════════════════════════ --}}
     <section id="hero" class="relative min-h-screen flex items-center pt-24 pb-16 overflow-hidden">
 
+        {{-- ░░ ZONE ASSET : hero / bannière ░░ — Uploader un asset de type "Hero / Bannière" dans Assets du site --}}
+        @if(isset($assets['hero']) && $assets['hero']->first())
+            <div class="absolute inset-0 pointer-events-none" style="z-index:0">
+                <img src="{{ $assets['hero']->first()->url }}" alt="Hero"
+                     class="w-full h-full object-cover opacity-15">
+                <div class="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/60 to-slate-950"></div>
+            </div>
+        @endif
+
         {{-- Canvas particles --}}
-        <canvas id="hero-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:0"></canvas>
+        <canvas id="hero-canvas" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index:1"></canvas>
 
         {{-- Decorative blobs --}}
         <div class="absolute top-1/4 left-0 w-96 h-96 bg-accent-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
@@ -142,8 +151,14 @@
                     <div class="absolute inset-0 bg-accent-primary/20 blur-[80px] rounded-full"></div>
                     <div class="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden glass border-2 border-white/10">
                         @if($adminUser && $adminUser->profile_photo)
+                            {{-- ░░ ZONE : photo de profil admin ░░ --}}
                             <img src="{{ asset('storage/' . $adminUser->profile_photo) }}?v={{ $adminUser->updated_at?->timestamp ?? time() }}"
                                  alt="Photo de profil de {{ $adminUser->name }}"
+                                 class="w-full h-full object-cover">
+                        @elseif(isset($assets['profil']) && $assets['profil']->first())
+                            {{-- ░░ ZONE ASSET : profil ░░ — Uploader un asset de type "Photo de profil" dans Assets du site --}}
+                            <img src="{{ $assets['profil']->first()->url }}"
+                                 alt="{{ $adminUser->name ?? 'Profil' }}"
                                  class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex flex-col items-center justify-center gap-4 bg-gradient-to-br from-slate-900 via-slate-950 to-black">
@@ -213,6 +228,15 @@
                 </div>
             </div>
 
+            {{-- ░░ ZONE ASSET : illustration ░░ — Uploader un asset de type "Illustration" dans Assets du site --}}
+            @if(isset($assets['illustration']) && $assets['illustration']->first())
+                <div class="rounded-2xl overflow-hidden glass border border-white/10 mb-5 section-reveal">
+                    <img src="{{ $assets['illustration']->first()->url }}"
+                         alt="Illustration à propos"
+                         class="w-full h-52 object-cover">
+                </div>
+            @endif
+
             {{-- Valeurs --}}
             <div class="grid grid-cols-1 gap-5">
                 @foreach([
@@ -239,14 +263,22 @@
     <div class="section-divider"></div>
 
     {{-- ══════════════════════════ TIMELINE ══════════════════════════ --}}
-    <section id="timeline" class="py-20">
+    <section id="timeline" class="py-20 relative overflow-hidden">
+
+        {{-- ░░ ZONE ASSET : background ░░ — Uploader un asset de type "Arrière-plan" dans Assets du site --}}
+        @if(isset($assets['background']) && $assets['background']->first())
+            <div class="absolute inset-0 pointer-events-none" style="z-index:0">
+                <img src="{{ $assets['background']->first()->url }}" alt=""
+                     class="w-full h-full object-cover opacity-[0.04]">
+            </div>
+        @endif
         <div class="text-center mb-16 section-reveal">
             <x-badge variant="primary" class="mb-4">PARCOURS</x-badge>
             <h2 class="text-4xl md:text-5xl font-bold">Formation & <span class="gradient-text">Expériences</span></h2>
             <p class="text-slate-400 mt-4 max-w-xl mx-auto">Mon chemin vers le développement web, étape par étape.</p>
         </div>
 
-        <div class="timeline-container max-w-4xl mx-auto space-y-0">
+        <div class="timeline-container max-w-4xl mx-auto space-y-0 relative z-10">
             @php
             $items = [
                 ['date' => '2024 — Présent', 'title' => 'Développeur Full-Stack Freelance', 'org' => 'Indépendant — Libreville & International', 'type' => 'exp', 'desc' => 'Conception et développement d\'applications web sur mesure pour des clients locaux et internationaux. Stack principal : Laravel, Vue.js, Tailwind CSS, MySQL.', 'icon' => '🚀'],
@@ -310,15 +342,23 @@
     <div class="section-divider"></div>
 
     {{-- ══════════════════════════ SKILLS ══════════════════════════ --}}
-    <section id="skills" class="py-20">
-        <div class="text-center mb-16 section-reveal">
+    <section id="skills" class="py-20 relative overflow-hidden">
+
+        {{-- ░░ ZONE ASSET : background (réutilisé) ░░ --}}
+        @if(isset($assets['background']) && $assets['background']->first())
+            <div class="absolute inset-0 pointer-events-none" style="z-index:0">
+                <img src="{{ $assets['background']->first()->url }}" alt=""
+                     class="w-full h-full object-cover opacity-[0.03] scale-x-[-1]">
+            </div>
+        @endif
+        <div class="text-center mb-16 section-reveal relative z-10">
             <x-badge variant="secondary">COMPÉTENCES</x-badge>
             <h2 class="text-4xl md:text-5xl font-bold mt-4">Tech <span class="gradient-text">Stack</span></h2>
             <p class="text-slate-400 mt-4 max-w-xl mx-auto">Les outils que je maîtrise et avec lesquels je construis chaque jour.</p>
         </div>
 
         @if($skills->count())
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
                 @php
                 $skillLevels = [
                     'Laravel' => 90, 'PHP' => 88, 'MySQL' => 82, 'Vue.js' => 78,
@@ -358,6 +398,41 @@
     </section>
 
     <div class="section-divider"></div>
+
+    {{-- ══════════════════════════ CERTIFICATIONS ══════════════════════════ --}}
+    {{-- ░░ ZONE ASSET : certification ░░ — Uploader des assets de type "Certification / Diplôme" dans Assets du site --}}
+    @if(isset($assets['certification']) && $assets['certification']->count())
+    <section id="certifications" class="py-20">
+        <div class="text-center mb-12 section-reveal">
+            <x-badge variant="secondary">CERTIFICATIONS</x-badge>
+            <h2 class="text-4xl md:text-5xl font-bold mt-4">Diplômes & <span class="gradient-text">Certifications</span></h2>
+            <p class="text-slate-400 mt-4 max-w-xl mx-auto">Formations validées et certifications professionnelles obtenues.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach($assets['certification'] as $i => $cert)
+                <div class="section-reveal" data-delay="{{ $i * 80 }}">
+                    <x-glass-card class="flex flex-col gap-4 p-0 overflow-hidden">
+                        <div class="w-full overflow-hidden bg-slate-900">
+                            <img src="{{ $cert->url }}"
+                                 alt="{{ $cert->title ?? 'Certification' }}"
+                                 class="w-full h-44 object-cover hover:scale-105 transition-transform duration-500">
+                        </div>
+                        <div class="px-5 pb-5 space-y-1">
+                            <p class="text-sm font-semibold text-slate-200">{{ $cert->title ?? 'Certification' }}</p>
+                            @if($cert->issuer)
+                                <p class="text-xs text-accent-primary">{{ $cert->issuer }}</p>
+                            @endif
+                            @if($cert->issue_date)
+                                <p class="text-xs text-slate-500 font-mono">{{ $cert->issue_date->format('M Y') }}</p>
+                            @endif
+                        </div>
+                    </x-glass-card>
+                </div>
+            @endforeach
+        </div>
+    </section>
+    <div class="section-divider"></div>
+    @endif
 
     {{-- ══════════════════════════ PROJETS ══════════════════════════ --}}
     <section id="projects" class="py-20">

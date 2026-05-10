@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Skill;
 use App\Models\User;
 use App\Models\ContactMessage;
+use App\Models\PublicDocument;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -29,17 +30,16 @@ class PortfolioController extends Controller
         $analytics->recordVisit($request);
 
         // Récupération des données
-        $projects = Project::latest()->get();
-        $skills = Skill::all()->groupBy('category');
-        $stats = [
-            'views' => $analytics->getTotalViews(),
+        $projects  = Project::latest()->get();
+        $skills    = Skill::all()->groupBy('category');
+        $assets    = PublicDocument::all()->groupBy('type');
+        $stats     = [
+            'views'  => $analytics->getTotalViews(),
             'unique' => $analytics->getTotalUniqueVisits(),
         ];
-        
-        // Récupère l'utilisateur admin par son email pour plus de fiabilité
         $adminUser = User::first();
 
-        return view('welcome', compact('projects', 'skills', 'stats', 'adminUser'));
+        return view('welcome', compact('projects', 'skills', 'stats', 'adminUser', 'assets'));
     }
 
     public function sendContact(Request $request): JsonResponse

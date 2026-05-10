@@ -20,5 +20,5 @@ class Visit extends Model
     /**
      * @var bool
      */
-    public $timestamps = false; // Géré via useCurrent dans la migration
+    public $timestamps = true;
 }
