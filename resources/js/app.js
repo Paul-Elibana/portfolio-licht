@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ProjectFilter.init();
     ContactForm.init();
     SmoothScrollLinks.init();
+    SkillBars.init();
 });
 
 /* ─── 1. NavbarController ───────────────────────────────── */
@@ -30,6 +31,12 @@ const NavbarController = {
         if (this.hamburger && this.mobileMenu) {
             this.hamburger.addEventListener('click', () => this.toggleMobile());
         }
+
+        document.addEventListener('click', (e) => {
+            if (this.mobileMenu?.classList.contains('open') && !this.nav.contains(e.target)) {
+                this.toggleMobile();
+            }
+        });
 
         this.initActiveLinks();
     },
@@ -137,7 +144,7 @@ const ParticlesCanvas = {
     ctx: null,
     particles: [],
     mouse: { x: -9999, y: -9999 },
-    COUNT: 55,
+    COUNT: 28,
 
     init() {
         this.canvas = document.getElementById('hero-canvas');
@@ -214,16 +221,17 @@ const ParticlesCanvas = {
             this.ctx.fill();
         });
 
-        // Draw connecting lines
+        // Draw connecting lines (squared comparison first — evite sqrt inutile)
+        const LINK_SQ = 140 * 140;
         for (let i = 0; i < this.particles.length; i++) {
             for (let j = i + 1; j < this.particles.length; j++) {
                 const a = this.particles[i];
                 const b = this.particles[j];
                 const dx = a.x - b.x;
                 const dy = a.y - b.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 140) {
-                    const alpha = (1 - dist / 140) * 0.15;
+                const dSq = dx * dx + dy * dy;
+                if (dSq < LINK_SQ) {
+                    const alpha = (1 - Math.sqrt(dSq) / 140) * 0.15;
                     this.ctx.beginPath();
                     this.ctx.moveTo(a.x, a.y);
                     this.ctx.lineTo(b.x, b.y);
@@ -341,8 +349,23 @@ const ContactForm = {
         const form = document.getElementById('contact-form');
         if (!form) return;
 
+        // Validation temps réel
+        form.querySelectorAll('input[required], textarea[required]').forEach(field => {
+            field.addEventListener('blur', () => this.validateField(field));
+            field.addEventListener('input', () => {
+                if (field.classList.contains('input-error')) this.validateField(field);
+            });
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            // Valider tous les champs avant envoi
+            let valid = true;
+            form.querySelectorAll('input[required], textarea[required]').forEach(f => {
+                if (!this.validateField(f)) valid = false;
+            });
+            if (!valid) return;
+
             const btn = form.querySelector('[type="submit"]');
             const original = btn.innerHTML;
             btn.disabled = true;
@@ -379,6 +402,16 @@ const ContactForm = {
                 btn.innerHTML = original;
             }
         });
+    },
+
+    validateField(field) {
+        const v = field.value.trim();
+        let ok = !(field.required && !v);
+        if (ok && field.type === 'email' && v) ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        if (ok && field.minLength > 0) ok = v.length >= field.minLength;
+        field.classList.toggle('input-error', !ok);
+        field.classList.toggle('input-ok', ok && !!v);
+        return ok;
     }
 };
 
@@ -410,13 +443,27 @@ const SmoothScrollLinks = {
                 if (!target) return;
                 e.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                // Close mobile menu if open
-                const mobileMenu = document.getElementById('mobile-menu');
-                if (mobileMenu?.classList.contains('open')) {
+                if (document.getElementById('mobile-menu')?.classList.contains('open')) {
                     NavbarController.toggleMobile();
                 }
             });
         });
+    }
+};
+
+/* ─── 10. SkillBars ─────────────────────────────────────── */
+const SkillBars = {
+    init() {
+        const bars = document.querySelectorAll('.skill-bar-fill');
+        if (!bars.length) return;
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.style.width = e.target.dataset.level + '%';
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.3 });
+        bars.forEach(b => obs.observe(b));
     }
 };

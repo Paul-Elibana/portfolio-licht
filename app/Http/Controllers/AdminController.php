@@ -108,7 +108,7 @@ class AdminController extends Controller
             'name'              => ['required', 'string', 'max:255'],
             'email'             => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
             'password'          => ['nullable', 'string', 'min:8', 'confirmed'],
-            'profile_photo'     => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:3072'],
+            'profile_photo'     => ['nullable', 'file', 'max:5120'],
             'public_email'      => ['nullable', 'email', 'max:255'],
             'phone'             => ['nullable', 'string', 'max:50'],
             'github_url'        => ['nullable', 'url', 'max:255'],
@@ -174,7 +174,7 @@ class AdminController extends Controller
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'technologies'=> ['required', 'string'],
-            'image_path'  => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:5120'],
+            'image_path'  => ['nullable', 'file', 'max:5120'],
             'github_url'  => ['nullable', 'url'],
             'live_url'    => ['nullable', 'url'],
         ]);
@@ -209,7 +209,7 @@ class AdminController extends Controller
             'title'       => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'technologies'=> ['required', 'string'],
-            'image_path'  => ['nullable', 'mimetypes:image/jpeg,image/png,image/webp,image/gif', 'max:5120'],
+            'image_path'  => ['nullable', 'file', 'max:5120'],
             'github_url'  => ['nullable', 'url'],
             'live_url'    => ['nullable', 'url'],
         ]);
@@ -419,16 +419,23 @@ class AdminController extends Controller
 
     private function saveImage(\Illuminate\Http\UploadedFile $file, string $folder, int $width, int $height, ?string $existing = null): string
     {
+        $filename = $folder . '/' . uniqid() . '.webp';
+
+        try {
+            $manager = new ImageManager(new GdDriver());
+            $image   = $manager->read($file->getRealPath());
+            $image->cover($width, $height);
+            Storage::disk('public')->put($filename, $image->toWebp(85));
+        } catch (\Throwable $e) {
+            // GD indisponible ou fichier invalide — stocker le fichier original
+            $ext      = $file->getClientOriginalExtension() ?: 'jpg';
+            $filename = $folder . '/' . uniqid() . '.' . $ext;
+            Storage::disk('public')->put($filename, file_get_contents($file->getRealPath()));
+        }
+
         if ($existing) {
             Storage::disk('public')->delete($existing);
         }
-
-        $filename = $folder . '/' . uniqid() . '.webp';
-        $manager  = new ImageManager(new GdDriver());
-        $image    = $manager->read($file->getRealPath());
-        $image->cover($width, $height);
-
-        Storage::disk('public')->put($filename, $image->toWebp(85));
 
         return $filename;
     }

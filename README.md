@@ -23,6 +23,7 @@ Portfolio personnel de **Paul Edwen Elibana Mbadinga**, développeur Full-Stack 
 | **Vite** | Bundler / build tool | HMR ultrarapide en dev, chunks optimisés en prod, intégration Laravel native |
 | **Vanilla JS** | Interactions UI | Particles canvas, typing effect, scroll reveal, filtres projets — sans framework lourd |
 | **Cropper.js 1.6** | Recadrage d'images interactif | Modal de recadrage côté client avant upload (profil, projets) — aucun aller-serveur inutile |
+| **PDF.js 3.11** | Rendu PDF côté client | Aperçu miniature de la première page des certifications PDF (portfolio + admin) |
 | **SortableJS** | Drag-and-drop | Réorganisation de la timeline et des entrées de parcours dans l'admin |
 | **QRCode.js** | Génération QR Code | QR code dynamique sur la carte de visite pointant vers le portfolio |
 
@@ -41,10 +42,11 @@ Portfolio personnel de **Paul Edwen Elibana Mbadinga**, développeur Full-Stack 
 | Extension | Utilité |
 |---|---|
 | `pdo` + `pdo_mysql` | Connexion MySQL via PDO |
-| `gd` | Traitement d'images (Intervention Image) |
-| `intl` | Internationalisation, formatage des nombres/dates |
+| `gd` | Traitement d'images (Intervention Image) — libpng, libjpeg-turbo, freetype |
+| `intl` | Internationalisation, formatage des nombres/dates — icu-libs |
 | `bcmath` | Calculs précis (analytics, compteurs) |
 | `opcache` | Cache du bytecode PHP — performances production |
+| `fileinfo` | Détection du type MIME réel des fichiers uploadés |
 
 ### Services externes
 | Service | Rôle |
@@ -73,7 +75,7 @@ Portfolio personnel de **Paul Edwen Elibana Mbadinga**, développeur Full-Stack 
 - **Compétences** : ajout/suppression, niveau (%) modifiable par slider
 - **Parcours** : CRUD formations & expériences, réorganisation drag-and-drop
 - **Services** : CRUD complet avec icône SVG, couleur, tags
-- **Assets du site** : images hero, profil, illustration, background, certifications
+- **Assets du site** : images hero, illustration, background, certifications (PDF avec aperçu miniature via PDF.js)
 - **Messages** : liste avec aperçu modal, marquer comme lu
 - **Maintenance** : reset visites / messages
 

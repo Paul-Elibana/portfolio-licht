@@ -267,6 +267,8 @@
         @apply border-accent-primary/50 bg-white/8;
         box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
     }
+    .contact-input.input-error { @apply border-red-400/60; box-shadow: 0 0 10px rgba(248,113,113,0.12); }
+    .contact-input.input-ok    { @apply border-green-400/40; }
     .contact-input option {
         background-color: #1e293b;
         color: #e2e8f0;

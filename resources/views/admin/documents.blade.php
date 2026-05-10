@@ -106,10 +106,11 @@
                                 @if($isImage)
                                     <img src="{{ $asset->url }}" alt="{{ $asset->title }}" class="w-full h-full object-cover">
                                 @elseif($isPdf)
-                                    <iframe src="{{ asset('storage/' . $asset->document_path) }}#toolbar=0&navpanes=0&scrollbar=0&view=FitH"
-                                            class="w-full h-full border-0 pointer-events-none"
-                                            loading="lazy"
-                                            title="{{ $asset->title }}"></iframe>
+                                    <div class="absolute inset-0 flex items-center justify-center bg-slate-900 pdf-admin-skeleton">
+                                        <svg class="w-8 h-8 text-slate-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    </div>
+                                    <canvas class="pdf-admin-thumb w-full h-full"
+                                            data-pdf-src="{{ asset('storage/' . $asset->document_path) }}"></canvas>
                                     <div class="absolute bottom-1 right-1 bg-red-500/20 border border-red-400/30 rounded px-1.5 py-0.5 text-[9px] text-red-400 font-mono">PDF</div>
                                 @else
                                     <div class="w-full h-full flex items-center justify-center">
@@ -211,5 +212,30 @@ document.getElementById('asset-file-input')?.addEventListener('change', function
         reader.readAsDataURL(file);
     }
 });
+// PDF.js pour apercu des assets PDF
+(function() {
+    const canvases = document.querySelectorAll('.pdf-admin-thumb');
+    if (!canvases.length) return;
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload = () => {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        canvases.forEach(canvas => {
+            pdfjsLib.getDocument(canvas.dataset.pdfSrc).promise
+                .then(pdf => pdf.getPage(1))
+                .then(page => {
+                    const vp = page.getViewport({ scale: 1 });
+                    const scale = canvas.parentElement.clientWidth / vp.width;
+                    const scaled = page.getViewport({ scale });
+                    canvas.width = scaled.width;
+                    canvas.height = scaled.height;
+                    return page.render({ canvasContext: canvas.getContext('2d'), viewport: scaled }).promise;
+                })
+                .then(() => canvas.parentElement.querySelector('.pdf-admin-skeleton')?.remove())
+                .catch(() => canvas.parentElement.querySelector('.pdf-admin-skeleton')?.remove());
+        });
+    };
+    document.head.appendChild(s);
+})();
 </script>
 @endsection
