@@ -2,55 +2,45 @@
 
 namespace Database\Seeders;
 
-use App\Models\Project;
 use App\Models\Skill;
+use App\Models\Project;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         \App\Models\User::firstOrCreate(
-            ['email' => 'admin@hubfolio.test'],
+            ['email' => 'paoloedwen@gmail.com'],
             [
-                'name' => 'Paul Edwen',
-                'password' => \Illuminate\Support\Facades\Hash::make('Paul2026!'),
+                'name'     => 'Paul Edwen Elibana Mbadinga',
+                'password' => Hash::make('HubFolio2026!'),
             ]
         );
 
-        // Création de compétences
-
         $skills = [
-            ['name' => 'Laravel', 'category' => 'Backend'],
-            ['name' => 'PHP 8.4', 'category' => 'Backend'],
-            ['name' => 'MySQL', 'category' => 'Backend'],
-            ['name' => 'Tailwind CSS', 'category' => 'Frontend'],
-            ['name' => 'React', 'category' => 'Frontend'],
-            ['name' => 'TypeScript', 'category' => 'Frontend'],
-            ['name' => 'Docker', 'category' => 'DevOps'],
-            ['name' => 'Vite', 'category' => 'Tools'],
+            ['name' => 'Laravel',      'category' => 'Backend',  'level' => 90],
+            ['name' => 'PHP 8.2',      'category' => 'Backend',  'level' => 85],
+            ['name' => 'MySQL',        'category' => 'Backend',  'level' => 80],
+            ['name' => 'Tailwind CSS', 'category' => 'Frontend', 'level' => 92],
+            ['name' => 'Vue.js',       'category' => 'Frontend', 'level' => 75],
+            ['name' => 'JavaScript',   'category' => 'Frontend', 'level' => 82],
+            ['name' => 'Git',          'category' => 'Tools',    'level' => 85],
+            ['name' => 'Vite',         'category' => 'Tools',    'level' => 78],
         ];
 
         foreach ($skills as $skill) {
-            Skill::create($skill);
+            Skill::firstOrCreate(['name' => $skill['name']], $skill);
         }
 
-        // Création de projets
-        Project::create([
-            'title' => 'Nexus Dashboard',
-            'description' => 'Une interface de gestion futuriste avec analytics en temps réel et effets de verre liquide.',
-            'technologies' => ['Laravel', 'Tailwind CSS', 'Chart.js'],
-            'github_url' => 'https://github.com',
-        ]);
-
-        Project::create([
-            'title' => 'Cyber-Commerce',
-            'description' => 'Plateforme e-commerce haute performance avec système de paiement intégré.',
-            'technologies' => ['React', 'Node.js', 'Stripe'],
-            'github_url' => 'https://github.com',
-        ]);
+        Project::firstOrCreate(
+            ['title' => 'HubFolio'],
+            [
+                'description'  => 'Portfolio personnel full-stack avec dashboard admin, analytics et gestion de contenu dynamique.',
+                'technologies' => ['Laravel', 'Tailwind CSS', 'Vite'],
+                'github_url'   => 'https://github.com/Paul-Elibana/portfolio-licht',
+            ]
+        );
     }
 }
