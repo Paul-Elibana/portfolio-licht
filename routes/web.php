@@ -40,10 +40,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Compétences
     Route::get('/skills', [AdminController::class, 'skills'])->name('skills');
     Route::post('/skills', [AdminController::class, 'storeSkill'])->name('skills.store');
+    Route::put('/skills/{skill}', [AdminController::class, 'updateSkill'])->name('skills.update');
     Route::delete('/skills/{skill}', [AdminController::class, 'deleteSkill'])->name('skills.delete');
 
     // Parcours / Timeline
     Route::get('/timeline', [AdminController::class, 'timeline'])->name('timeline');
+    Route::post('/timeline/reorder', [AdminController::class, 'reorderTimeline'])->name('timeline.reorder');
     Route::get('/timeline/create', [AdminController::class, 'createTimeline'])->name('timeline.create');
     Route::post('/timeline', [AdminController::class, 'storeTimeline'])->name('timeline.store');
     Route::get('/timeline/{entry}/edit', [AdminController::class, 'editTimeline'])->name('timeline.edit');

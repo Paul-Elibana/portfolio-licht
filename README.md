@@ -1,145 +1,121 @@
-# HubFolio — Portfolio de Paul Edwen Elibana Mbadinga
+# HubFolio — Portfolio Full-Stack
 
-Portfolio personnel futuriste construit avec **Laravel 12**, **Tailwind CSS v4** et **Vite 7**.
+Portfolio personnel de **Paul Edwen Elibana Mbadinga**, développeur Full-Stack basé à Libreville, Gabon.
+
+**Stack :** Laravel 12 · PHP 8.2 · Tailwind CSS v4 · Vite · MySQL · Blade
 
 ---
 
-## Stack technique
+## Démo en ligne
 
-| Couche | Technologies |
-|---|---|
-| Backend | Laravel 12, PHP 8.2+, MySQL, Eloquent ORM |
-| Frontend | Tailwind CSS v4, Blade Templates, Vanilla JS |
-| Build | Vite 7, Laravel Vite Plugin |
-| Auth | Session-based (Laravel Auth) |
+**URL :** `https://portfolio-licht-production.up.railway.app`
+**Admin :** `/login` → `paoloedwen@gmail.com`
 
 ---
 
 ## Fonctionnalités
 
-**Portfolio public**
-- Hero animé — canvas particles interactif, typing effect, avatar flottant
-- Section À propos avec valeurs et compteurs animés
-- Timeline parcours (formation + expériences)
-- Compétences avec barres de progression animées au scroll
-- Projets avec filtre par technologie et overlay hover
+### Portfolio public
+- Hero animé (canvas particles, typing effect, avatar flottant)
+- Section À propos + valeurs
+- Timeline Parcours (formations & expériences dynamiques)
+- Compétences avec barres de progression animées
+- Projets avec filtres par technologie
 - Services proposés
-- Formulaire de contact avec envoi AJAX et stockage en base
-- Design futuriste glassmorphism — palette neon cyan / violet
+- Formulaire de contact (stockage DB + notification email optionnelle)
+- Carte de visite imprimable (`/carte`)
 
-**Espace admin (protégé)**
-- Tableau de bord : stats vues, visiteurs uniques, projets, compétences, messages reçus
-- CRUD complet projets (titre, description, technologies, image, liens GitHub/live)
-- CRUD compétences par catégorie
-- Gestion profil (nom, email, photo, mot de passe)
-- Coffre-fort de documents (PDF, images)
-- Messages de contact reçus avec statut lu/non lu
+### Dashboard admin
+- Statistiques visiteurs (vues totales, visiteurs uniques)
+- **Profil** : photo, coordonnées publiques (email, téléphone, GitHub, LinkedIn, localisation), statut de disponibilité éditable
+- **Projets** : CRUD complet avec upload image et prévisualisation instantanée
+- **Compétences** : ajout/suppression, niveau (%) modifiable par slider
+- **Parcours** : CRUD formations & expériences, réorganisation par drag-and-drop
+- **Assets du site** : images hero, profil, illustration, background, certifications
+- **Messages** : liste avec aperçu modal au clic, marquer comme lu
+- **Maintenance** : reset visites / messages
 
 ---
 
-## Installation
+## Installation locale
 
 ```bash
-# 1. Cloner le dépôt
-git clone <url-du-repo>
-cd mon-site
+git clone https://github.com/Paul-Elibana/portfolio-licht.git
+cd portfolio-licht
 
-# 2. Installer les dépendances PHP
 composer install
-
-# 3. Installer les dépendances JS
 npm install
 
-# 4. Configurer l'environnement
 cp .env.example .env
 php artisan key:generate
 
-# 5. Configurer la base de données dans .env
-DB_DATABASE=hubfolio
-DB_USERNAME=root
-DB_PASSWORD=
-
-# 6. Migrer et seeder
+# Configurer DB_* dans .env
 php artisan migrate --seed
-
-# 7. Lier le stockage public
 php artisan storage:link
 
-# 8. Builder les assets
-npm run build
-
-# 9. Lancer le serveur (développement)
-php artisan serve
-```
-
----
-
-## Développement
-
-```bash
-# Lancer Vite en mode watch + serveur Laravel
 npm run dev
 php artisan serve
 ```
 
 ---
 
-## Structure des fichiers clés
+## Déploiement Railway
+
+Railway détecte automatiquement le `Dockerfile` (nginx + php-fpm) et build l'image.
+
+**Variables d'environnement Railway requises :**
+```
+APP_ENV=production
+APP_KEY=base64:...
+APP_URL=https://votre-app.railway.app
+
+DB_HOST=mysql.railway.internal
+DB_PORT=3306
+DB_DATABASE=railway
+DB_USERNAME=root
+DB_PASSWORD=...
+
+SESSION_DRIVER=database
+```
+
+**Activer les notifications Gmail (optionnel) :**
+1. Compte Google → Sécurité → Validation en 2 étapes (activer)
+2. Sécurité → Mots de passe des applications → Créer "HubFolio"
+3. Ajouter dans Railway :
+```
+MAIL_MAILER=smtp
+MAIL_SCHEME=ssl
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_USERNAME=paoloedwen@gmail.com
+MAIL_PASSWORD=xxxx_xxxx_xxxx_xxxx
+MAIL_FROM_ADDRESS=paoloedwen@gmail.com
+MAIL_FROM_NAME=HubFolio
+```
+
+---
+
+## Structure principale
 
 ```
 app/
 ├── Http/Controllers/
-│   ├── PortfolioController.php   # Page publique + formulaire contact
-│   └── AdminController.php       # Toute la partie admin
+│   ├── AdminController.php      CRUD admin complet
+│   └── PortfolioController.php  Pages publiques
+├── Mail/
+│   └── NewContactMessage.php    Notification email contact
 ├── Models/
-│   ├── Project.php
-│   ├── Skill.php
-│   ├── ContactMessage.php        # Messages du formulaire de contact
-│   ├── Visit.php
-│   └── User.php
-└── Services/
-    └── AnalyticsService.php
-
-resources/
-├── css/app.css                   # Tailwind v4 + utilities custom (glassmorphism, animations)
-├── js/app.js                     # Modules JS (particles, typing, scroll-reveal, filtres...)
-└── views/
-    ├── welcome.blade.php          # Page portfolio (toutes les sections)
-    ├── components/
-    │   ├── glass-card.blade.php
-    │   └── badge.blade.php
-    └── admin/
-        ├── dashboard.blade.php
-        ├── projects.blade.php
-        ├── skills.blade.php
-        ├── profile.blade.php
-        └── documents.blade.php
+│   ├── User.php                 + coordonnées publiques + disponibilité
+│   ├── Skill.php                + level (%)
+│   ├── TimelineEntry.php        Parcours
+│   ├── ContactMessage.php
+│   └── PublicDocument.php       Assets (hero, profil, background, certification...)
+docker/
+├── nginx.conf / supervisord.conf / start.sh
+resources/views/
+├── welcome.blade.php            Portfolio public
+├── admin/
+│   ├── dashboard / profile / skills / projects
+│   └── timeline/  (index / create / edit)
+└── emails/contact-notification.blade.php
 ```
-
----
-
-## Variables d'environnement importantes
-
-```env
-APP_NAME=HubFolio
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=hubfolio
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
----
-
-## Auteur
-
-**Paul Edwen Elibana Mbadinga**  
-Développeur Full-Stack — Libreville, Gabon  
-[GitHub](https://github.com/Paul-Elibana) · [WhatsApp](https://wa.me/24177519644)
-
----
-
-> Built with Laravel + Tailwind CSS + ♥

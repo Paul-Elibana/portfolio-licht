@@ -41,9 +41,9 @@
                         <th class="px-5 py-4 text-right">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody class="divide-y divide-white/5" id="sortable-tbody">
                     @foreach($entries as $entry)
-                        <tr class="hover:bg-white/5 transition-colors">
+                        <tr class="hover:bg-white/5 transition-colors cursor-grab active:cursor-grabbing" data-id="{{ $entry->id }}">
                             <td class="px-5 py-4 text-xl">{{ $entry->icon }}</td>
                             <td class="px-5 py-4">
                                 <div class="font-medium text-sm text-slate-200">{{ $entry->title }}</div>
@@ -81,8 +81,32 @@
         @endif
     </x-glass-card>
 
-    <p class="text-xs text-slate-600 font-mono">
-        Ordre d'affichage : du plus petit numéro d'ordre au plus grand. Modifiez le champ "Ordre" pour réorganiser.
+    <p class="text-xs text-slate-600 font-mono flex items-center gap-2">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+        Glissez-déposez les lignes pour réorganiser l'ordre d'affichage sur le portfolio.
     </p>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script>
+const tbody = document.querySelector('#sortable-tbody');
+if (tbody) {
+    Sortable.create(tbody, {
+        animation: 150,
+        handle: 'tr',
+        ghostClass: 'opacity-40',
+        onEnd: () => {
+            const order = [...tbody.querySelectorAll('tr[data-id]')].map(tr => tr.dataset.id);
+            fetch('{{ route('admin.timeline.reorder') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ order }),
+            });
+        },
+    });
+}
+</script>
 @endsection

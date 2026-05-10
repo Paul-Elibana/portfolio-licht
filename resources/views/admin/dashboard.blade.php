@@ -77,7 +77,8 @@
                 </thead>
                 <tbody class="divide-y divide-white/5">
                     @forelse($stats['recent_messages'] as $msg)
-                        <tr class="hover:bg-white/5 transition-colors {{ $msg->read_at ? '' : 'bg-accent-primary/3' }}">
+                        <tr class="hover:bg-white/5 transition-colors cursor-pointer {{ $msg->read_at ? '' : 'bg-accent-primary/3' }}"
+                            onclick="openMsg({{ $msg->id }}, '{{ addslashes($msg->name) }}', '{{ addslashes($msg->email) }}', '{{ addslashes($msg->subject) }}', {{ json_encode($msg->message) }}, '{{ $msg->created_at?->format('d/m/Y H:i') ?? '' }}', {{ $msg->read_at ? 'true' : 'false' }})">
                             <td class="px-5 py-4">
                                 <div class="font-medium text-sm text-slate-200">{{ $msg->name }}</div>
                                 <div class="text-xs text-slate-500">{{ $msg->email }}</div>
@@ -87,11 +88,11 @@
                             <td class="px-5 py-4 text-xs text-slate-500 font-mono whitespace-nowrap">
                                 {{ $msg->created_at?->format('d/m/y H:i') ?? '—' }}
                             </td>
-                            <td class="px-5 py-4">
+                            <td class="px-5 py-4" onclick="event.stopPropagation()">
                                 @if($msg->read_at)
                                     <span class="px-2 py-0.5 rounded-full bg-white/5 text-slate-500 text-xs border border-white/10">Lu</span>
                                 @else
-                                    <form action="{{ route('admin.messages.read', $msg) }}" method="POST" class="inline">
+                                    <form action="{{ route('admin.messages.read', $msg) }}" method="POST" class="inline" id="read-form-{{ $msg->id }}">
                                         @csrf
                                         <button type="submit" class="px-2 py-0.5 rounded-full bg-accent-primary/15 text-accent-primary text-xs border border-accent-primary/30 font-medium hover:bg-accent-primary/25 transition-colors">
                                             Nouveau
@@ -175,4 +176,68 @@
         </x-glass-card>
     </div>
 </div>
+
+{{-- ── Modal aperçu message ──────────────────────────── --}}
+<div id="msg-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background:rgba(0,0,0,.7);backdrop-filter:blur(8px)">
+    <div class="glass border border-white/15 rounded-2xl w-full max-w-lg shadow-2xl">
+        <div class="flex items-start justify-between p-6 border-b border-white/10">
+            <div>
+                <p id="modal-name" class="font-bold text-slate-100 text-lg"></p>
+                <p id="modal-email" class="text-xs text-slate-500 mt-0.5"></p>
+            </div>
+            <button onclick="closeMsg()" class="text-slate-500 hover:text-slate-200 transition-colors ml-4 mt-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div>
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Sujet</p>
+                <p id="modal-subject" class="text-sm font-medium text-slate-200"></p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-500 uppercase tracking-wide mb-1">Message</p>
+                <p id="modal-message" class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap"></p>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-white/10">
+                <p id="modal-date" class="text-xs text-slate-600 font-mono"></p>
+                <div id="modal-actions"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentMsgId = null;
+function openMsg(id, name, email, subject, message, date, isRead) {
+    currentMsgId = id;
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-email').textContent = email;
+    document.getElementById('modal-subject').textContent = subject;
+    document.getElementById('modal-message').textContent = message;
+    document.getElementById('modal-date').textContent = date;
+    const actions = document.getElementById('modal-actions');
+    if (!isRead) {
+        actions.innerHTML = `<form action="/admin/messages/${id}/read" method="POST" style="display:inline">
+            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+            <button type="submit" class="text-xs px-3 py-1.5 rounded-lg bg-accent-primary/15 text-accent-primary border border-accent-primary/30 hover:bg-accent-primary/25 transition-colors">
+                Marquer comme lu
+            </button>
+        </form>`;
+    } else {
+        actions.innerHTML = `<span class="text-xs text-slate-500">Message lu</span>`;
+    }
+    const modal = document.getElementById('msg-modal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+function closeMsg() {
+    const modal = document.getElementById('msg-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+document.getElementById('msg-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeMsg();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMsg(); });
+</script>
 @endsection

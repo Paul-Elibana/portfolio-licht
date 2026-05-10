@@ -102,14 +102,28 @@ class AdminController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'name'          => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
-            'password'      => ['nullable', 'string', 'min:8', 'confirmed'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'name'              => ['required', 'string', 'max:255'],
+            'email'             => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'password'          => ['nullable', 'string', 'min:8', 'confirmed'],
+            'profile_photo'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+            'public_email'      => ['nullable', 'email', 'max:255'],
+            'phone'             => ['nullable', 'string', 'max:50'],
+            'github_url'        => ['nullable', 'url', 'max:255'],
+            'linkedin_url'      => ['nullable', 'url', 'max:255'],
+            'location'          => ['nullable', 'string', 'max:100'],
+            'is_available'      => ['nullable', 'boolean'],
+            'availability_text' => ['nullable', 'string', 'max:100'],
         ]);
 
-        $user->name  = $request->name;
-        $user->email = $request->email;
+        $user->name             = $request->name;
+        $user->email            = $request->email;
+        $user->public_email     = $request->public_email;
+        $user->phone            = $request->phone;
+        $user->github_url       = $request->github_url;
+        $user->linkedin_url     = $request->linkedin_url;
+        $user->location         = $request->location;
+        $user->is_available     = $request->boolean('is_available');
+        $user->availability_text = $request->availability_text;
 
         if ($request->filled('password')) {
             $user->password = Hash::make($request->password);
@@ -230,6 +244,13 @@ class AdminController extends Controller
         return back()->with('success', 'Compétence ajoutée.');
     }
 
+    public function updateSkill(Request $request, Skill $skill): RedirectResponse
+    {
+        $request->validate(['level' => ['required', 'integer', 'min:10', 'max:100']]);
+        $skill->update(['level' => $request->level]);
+        return back()->with('success', 'Niveau mis à jour.');
+    }
+
     public function deleteSkill(Skill $skill): RedirectResponse
     {
         $skill->delete();
@@ -316,6 +337,15 @@ class AdminController extends Controller
         return view('admin.timeline.index', [
             'entries' => TimelineEntry::orderBy('sort_order')->orderBy('id')->get(),
         ]);
+    }
+
+    public function reorderTimeline(Request $request): JsonResponse
+    {
+        $request->validate(['order' => ['required', 'array'], 'order.*' => ['integer']]);
+        foreach ($request->order as $position => $id) {
+            TimelineEntry::where('id', $id)->update(['sort_order' => $position]);
+        }
+        return response()->json(['success' => true]);
     }
 
     public function createTimeline(): View

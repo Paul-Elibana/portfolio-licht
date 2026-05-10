@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewContactMessage;
 use App\Models\Project;
 use App\Models\Skill;
 use App\Models\TimelineEntry;
@@ -11,6 +12,7 @@ use App\Models\PublicDocument;
 use App\Services\AnalyticsService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 /**
@@ -53,7 +55,19 @@ class PortfolioController extends Controller
             'message' => ['required', 'string', 'min:10', 'max:5000'],
         ]);
 
-        ContactMessage::create($validated);
+        $message = ContactMessage::create($validated);
+
+        // Notification par email si MAIL_MAILER est configuré
+        if (config('mail.default') !== 'log' && config('mail.mailers.' . config('mail.default') . '.transport') !== 'log') {
+            $adminEmail = User::first()?->email;
+            if ($adminEmail) {
+                try {
+                    Mail::to($adminEmail)->send(new NewContactMessage($message));
+                } catch (\Exception) {
+                    // L'email échoue silencieusement — le message est déjà sauvegardé en DB
+                }
+            }
+        }
 
         return response()->json(['success' => true, 'message' => 'Message envoyé avec succès !']);
     }

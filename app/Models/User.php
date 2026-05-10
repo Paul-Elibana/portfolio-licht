@@ -23,6 +23,13 @@ class User extends Authenticatable
         'email',
         'password',
         'profile_photo',
+        'public_email',
+        'phone',
+        'github_url',
+        'linkedin_url',
+        'location',
+        'is_available',
+        'availability_text',
     ];
 
     /**
@@ -44,7 +51,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',
+            'is_available'      => 'boolean',
         ];
     }
 }
