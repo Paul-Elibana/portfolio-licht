@@ -1,8 +1,9 @@
 FROM php:8.2-fpm-alpine
 
 # Extensions PHP
-RUN apk add --no-cache nginx supervisor nodejs npm \
-    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl
+RUN apk add --no-cache nginx supervisor nodejs npm icu-dev \
+    && docker-php-ext-install pdo pdo_mysql bcmath opcache intl \
+    && apk del icu-dev
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
