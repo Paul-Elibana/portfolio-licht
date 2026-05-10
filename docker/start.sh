@@ -10,6 +10,9 @@ mkdir -p storage/app/public/profile-photos
 mkdir -p storage/app/public/projects
 mkdir -p storage/app/public/assets
 mkdir -p storage/logs
+mkdir -p storage/framework/views
+mkdir -p storage/framework/cache/data
+mkdir -p storage/framework/sessions
 mkdir -p bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache
 
