@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
-            $table->string('icon_svg')->nullable();
+            $table->text('icon_svg')->nullable();
             $table->string('color')->default('primary');
             $table->json('tags')->nullable();
             $table->unsignedSmallInteger('sort_order')->default(0);
