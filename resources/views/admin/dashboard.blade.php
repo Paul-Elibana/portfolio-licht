@@ -13,7 +13,7 @@
     </div>
 
     {{-- Stats Grid --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <x-glass-card :hover="false">
             <div class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-mono">Total Vues</div>
             <div class="text-3xl font-bold text-accent-primary">{{ number_format($stats['total_views']) }}</div>
@@ -26,12 +26,17 @@
 
         <x-glass-card :hover="false">
             <div class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-mono">Projets</div>
-            <div class="text-3xl font-bold">{{ $stats['projects_count'] }}</div>
+            <a href="{{ route('admin.projects') }}" class="text-3xl font-bold hover:text-accent-primary transition-colors block">{{ $stats['projects_count'] }}</a>
         </x-glass-card>
 
         <x-glass-card :hover="false">
             <div class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-mono">Compétences</div>
-            <div class="text-3xl font-bold">{{ $stats['skills_count'] }}</div>
+            <a href="{{ route('admin.skills') }}" class="text-3xl font-bold hover:text-accent-primary transition-colors block">{{ $stats['skills_count'] }}</a>
+        </x-glass-card>
+
+        <x-glass-card :hover="false">
+            <div class="text-xs text-slate-500 uppercase tracking-widest mb-2 font-mono">Parcours</div>
+            <a href="{{ route('admin.timeline') }}" class="text-3xl font-bold hover:text-accent-primary transition-colors block">{{ $stats['timeline_count'] }}</a>
         </x-glass-card>
 
         <x-glass-card :hover="false">

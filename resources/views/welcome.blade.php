@@ -279,17 +279,7 @@
         </div>
 
         <div class="timeline-container max-w-4xl mx-auto space-y-0 relative z-10">
-            @php
-            $items = [
-                ['date' => '2024 — Présent', 'title' => 'Développeur Full-Stack Freelance', 'org' => 'Indépendant — Libreville & International', 'type' => 'exp', 'desc' => 'Conception et développement d\'applications web sur mesure pour des clients locaux et internationaux. Stack principal : Laravel, Vue.js, Tailwind CSS, MySQL.', 'icon' => '🚀'],
-                ['date' => '2022 — 2024', 'title' => 'Licence en Informatique', 'org' => 'Université Omar Bongo — Libreville', 'type' => 'edu', 'desc' => 'Spécialisation en développement logiciel et systèmes d\'information. Projet de fin d\'études : plateforme de gestion académique en Laravel.', 'icon' => '🎓'],
-                ['date' => '2023', 'title' => 'Développeur Stagiaire', 'org' => 'Agence Digitale — Libreville', 'type' => 'exp', 'desc' => 'Participation au développement de sites web pour des entreprises gabonaises. Apprentissage des méthodes agiles et des bonnes pratiques en équipe.', 'icon' => '💼'],
-                ['date' => '2021 — 2022', 'title' => 'BTS Développement Web & Mobile', 'org' => 'Institut Supérieur de Technologie — Libreville', 'type' => 'edu', 'desc' => 'Fondamentaux du développement web (HTML, CSS, JavaScript, PHP). Premier contact avec les frameworks modernes.', 'icon' => '📚'],
-                ['date' => '2021', 'title' => 'Autodidacte & Certification', 'org' => 'OpenClassrooms / FreeCodeCamp', 'type' => 'edu', 'desc' => 'Parcours d\'apprentissage intensif en développement web. Certifications en JavaScript, React et UX Design.', 'icon' => '⚡'],
-            ];
-            @endphp
-
-            @foreach($items as $i => $item)
+            @forelse($timeline as $i => $item)
                 @php $isLeft = $i % 2 === 0; @endphp
                 <div class="relative grid md:grid-cols-2 gap-0 min-h-[140px] items-center
                     {{ $isLeft ? 'reveal-left' : 'reveal-right' }}" data-delay="{{ $i * 100 }}">
@@ -298,15 +288,17 @@
                     <div class="{{ $isLeft ? 'md:pr-12 md:text-right' : 'md:col-start-2 md:pl-12' }}">
                         @if($isLeft)
                             <div class="glass-strong rounded-2xl p-6 mb-4 md:mb-8">
-                                <div class="flex items-center {{ $isLeft ? 'md:justify-end' : '' }} gap-2 mb-2">
-                                    <x-badge variant="{{ $item['type'] === 'exp' ? 'primary' : 'secondary' }}">
-                                        {{ $item['type'] === 'exp' ? 'Expérience' : 'Formation' }}
+                                <div class="flex items-center md:justify-end gap-2 mb-2">
+                                    <x-badge variant="{{ $item->type === 'exp' ? 'primary' : 'secondary' }}">
+                                        {{ $item->type === 'exp' ? 'Expérience' : 'Formation' }}
                                     </x-badge>
-                                    <span class="text-xs text-slate-500 font-mono">{{ $item['date'] }}</span>
+                                    <span class="text-xs text-slate-500 font-mono">{{ $item->date_label }}</span>
                                 </div>
-                                <h3 class="font-bold text-slate-100 mb-1">{{ $item['title'] }}</h3>
-                                <p class="text-sm text-accent-primary mb-2">{{ $item['org'] }}</p>
-                                <p class="text-xs text-slate-400 leading-relaxed">{{ $item['desc'] }}</p>
+                                <h3 class="font-bold text-slate-100 mb-1">{{ $item->title }}</h3>
+                                <p class="text-sm text-accent-primary mb-2">{{ $item->organization }}</p>
+                                @if($item->description)
+                                    <p class="text-xs text-slate-400 leading-relaxed">{{ $item->description }}</p>
+                                @endif
                             </div>
                         @endif
                     </div>
@@ -314,7 +306,7 @@
                     {{-- Center dot --}}
                     <div class="hidden md:block absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
                         <div class="timeline-dot relative">
-                            <span class="absolute inset-0 flex items-center justify-center text-xs">{{ $item['icon'] }}</span>
+                            <span class="absolute inset-0 flex items-center justify-center text-xs">{{ $item->icon }}</span>
                         </div>
                     </div>
 
@@ -323,19 +315,25 @@
                         <div class="md:col-start-2 md:pl-12">
                             <div class="glass-strong rounded-2xl p-6 mb-4 md:mb-8">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <x-badge variant="{{ $item['type'] === 'exp' ? 'primary' : 'secondary' }}">
-                                        {{ $item['type'] === 'exp' ? 'Expérience' : 'Formation' }}
+                                    <x-badge variant="{{ $item->type === 'exp' ? 'primary' : 'secondary' }}">
+                                        {{ $item->type === 'exp' ? 'Expérience' : 'Formation' }}
                                     </x-badge>
-                                    <span class="text-xs text-slate-500 font-mono">{{ $item['date'] }}</span>
+                                    <span class="text-xs text-slate-500 font-mono">{{ $item->date_label }}</span>
                                 </div>
-                                <h3 class="font-bold text-slate-100 mb-1">{{ $item['title'] }}</h3>
-                                <p class="text-sm text-accent-secondary mb-2">{{ $item['org'] }}</p>
-                                <p class="text-xs text-slate-400 leading-relaxed">{{ $item['desc'] }}</p>
+                                <h3 class="font-bold text-slate-100 mb-1">{{ $item->title }}</h3>
+                                <p class="text-sm text-accent-secondary mb-2">{{ $item->organization }}</p>
+                                @if($item->description)
+                                    <p class="text-xs text-slate-400 leading-relaxed">{{ $item->description }}</p>
+                                @endif
                             </div>
                         </div>
                     @endif
                 </div>
-            @endforeach
+            @empty
+                <div class="text-center py-16 text-slate-500 italic">
+                    Aucune entrée de parcours pour l'instant.
+                </div>
+            @endforelse
         </div>
     </section>
 

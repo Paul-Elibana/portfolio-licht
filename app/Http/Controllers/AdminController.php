@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Skill;
+use App\Models\TimelineEntry;
 use App\Models\Visit;
 use App\Models\PublicDocument;
 use App\Models\ContactMessage;
@@ -61,6 +62,7 @@ class AdminController extends Controller
             'projects_count'  => Project::count(),
             'skills_count'    => Skill::count(),
             'assets_count'    => PublicDocument::count(),
+            'timeline_count'  => TimelineEntry::count(),
             'messages_count'  => ContactMessage::count(),
             'unread_messages' => ContactMessage::whereNull('read_at')->count(),
             'recent_messages' => ContactMessage::latest()->take(20)->get(),
@@ -305,5 +307,65 @@ class AdminController extends Controller
         Storage::disk('public')->delete($document->document_path);
         $document->delete();
         return back()->with('success', 'Asset supprimé.');
+    }
+
+    /* ─── PARCOURS / TIMELINE ───────────────────────────────── */
+
+    public function timeline(): View
+    {
+        return view('admin.timeline.index', [
+            'entries' => TimelineEntry::orderBy('sort_order')->orderBy('id')->get(),
+        ]);
+    }
+
+    public function createTimeline(): View
+    {
+        return view('admin.timeline.create');
+    }
+
+    public function storeTimeline(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'date_label'   => ['required', 'string', 'max:100'],
+            'title'        => ['required', 'string', 'max:255'],
+            'organization' => ['required', 'string', 'max:255'],
+            'type'         => ['required', 'in:exp,edu'],
+            'description'  => ['nullable', 'string', 'max:1000'],
+            'icon'         => ['nullable', 'string', 'max:20'],
+            'sort_order'   => ['nullable', 'integer', 'min:0', 'max:9999'],
+        ]);
+
+        $validated['icon']       = $validated['icon'] ?? '🚀';
+        $validated['sort_order'] = $validated['sort_order'] ?? TimelineEntry::max('sort_order') + 1;
+
+        TimelineEntry::create($validated);
+        return redirect()->route('admin.timeline')->with('success', 'Entrée ajoutée au parcours.');
+    }
+
+    public function editTimeline(TimelineEntry $entry): View
+    {
+        return view('admin.timeline.edit', compact('entry'));
+    }
+
+    public function updateTimeline(Request $request, TimelineEntry $entry): RedirectResponse
+    {
+        $validated = $request->validate([
+            'date_label'   => ['required', 'string', 'max:100'],
+            'title'        => ['required', 'string', 'max:255'],
+            'organization' => ['required', 'string', 'max:255'],
+            'type'         => ['required', 'in:exp,edu'],
+            'description'  => ['nullable', 'string', 'max:1000'],
+            'icon'         => ['nullable', 'string', 'max:20'],
+            'sort_order'   => ['nullable', 'integer', 'min:0', 'max:9999'],
+        ]);
+
+        $entry->update($validated);
+        return redirect()->route('admin.timeline')->with('success', 'Entrée mise à jour.');
+    }
+
+    public function deleteTimeline(TimelineEntry $entry): RedirectResponse
+    {
+        $entry->delete();
+        return back()->with('success', 'Entrée supprimée du parcours.');
     }
 }
