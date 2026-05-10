@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Skill;
 use App\Models\Project;
+use App\Models\Service;
 use App\Models\TimelineEntry;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -58,5 +59,36 @@ class DatabaseSeeder extends Seeder
                 'github_url'   => 'https://github.com/Paul-Elibana/portfolio-licht',
             ]
         );
+
+        $services = [
+            [
+                'sort_order'  => 0,
+                'title'       => 'Développement Full-Stack',
+                'description' => 'Conception et développement d\'applications web complètes, de la base de données à l\'interface utilisateur. Expertise Laravel, PHP, MySQL, Vue.js et API REST.',
+                'icon_svg'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>',
+                'color'       => 'primary',
+                'tags'        => ['Laravel', 'PHP', 'Vue.js', 'MySQL'],
+            ],
+            [
+                'sort_order'  => 1,
+                'title'       => 'Design UI/UX Moderne',
+                'description' => 'Création d\'interfaces utilisateurs soignées, intuitives et accessibles. Du wireframe à la mise en production, avec un focus sur l\'expérience utilisateur.',
+                'icon_svg'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>',
+                'color'       => 'secondary',
+                'tags'        => ['Figma', 'Tailwind', 'Responsive'],
+            ],
+            [
+                'sort_order'  => 2,
+                'title'       => 'Conseil & Architecture',
+                'description' => 'Audit technique de vos projets existants, recommandations d\'architecture, optimisation des performances et accompagnement dans vos choix technologiques.',
+                'icon_svg'    => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+                'color'       => 'primary',
+                'tags'        => ['Audit', 'Optimisation', 'Conseil'],
+            ],
+        ];
+
+        foreach ($services as $service) {
+            Service::firstOrCreate(['title' => $service['title']], $service);
+        }
     }
 }

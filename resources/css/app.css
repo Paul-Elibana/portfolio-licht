@@ -267,6 +267,10 @@
         @apply border-accent-primary/50 bg-white/8;
         box-shadow: 0 0 20px rgba(0, 242, 255, 0.1);
     }
+    .contact-input option {
+        background-color: #1e293b;
+        color: #e2e8f0;
+    }
 
     /* Glow elements */
     .glow-cyan  { box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }

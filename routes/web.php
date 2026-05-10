@@ -52,6 +52,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/timeline/{entry}', [AdminController::class, 'updateTimeline'])->name('timeline.update');
     Route::delete('/timeline/{entry}', [AdminController::class, 'deleteTimeline'])->name('timeline.delete');
 
+    // Services
+    Route::get('/services', [AdminController::class, 'services'])->name('services');
+    Route::get('/services/create', [AdminController::class, 'createService'])->name('services.create');
+    Route::post('/services', [AdminController::class, 'storeService'])->name('services.store');
+    Route::get('/services/{service}/edit', [AdminController::class, 'editService'])->name('services.edit');
+    Route::put('/services/{service}', [AdminController::class, 'updateService'])->name('services.update');
+    Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('services.delete');
+
     // Assets du site
     Route::get('/documents', [AdminController::class, 'documents'])->name('documents');
     Route::post('/documents', [AdminController::class, 'storeDocument'])->name('documents.store');

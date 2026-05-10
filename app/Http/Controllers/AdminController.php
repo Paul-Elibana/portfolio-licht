@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Service;
 use App\Models\Skill;
 use App\Models\TimelineEntry;
 use App\Models\Visit;
@@ -397,5 +398,73 @@ class AdminController extends Controller
     {
         $entry->delete();
         return back()->with('success', 'Entrée supprimée du parcours.');
+    }
+
+    /* ─── SERVICES ──────────────────────────────────────────── */
+
+    public function services(): View
+    {
+        return view('admin.services.index', [
+            'services' => Service::orderBy('sort_order')->get(),
+        ]);
+    }
+
+    public function createService(): View
+    {
+        return view('admin.services.create');
+    }
+
+    public function storeService(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:1000'],
+            'icon_svg'    => ['nullable', 'string'],
+            'color'       => ['required', 'in:primary,secondary'],
+            'tags'        => ['nullable', 'string'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+            'is_active'   => ['nullable', 'boolean'],
+        ]);
+
+        $validated['tags']       = $validated['tags']
+            ? array_map('trim', explode(',', $validated['tags']))
+            : [];
+        $validated['is_active']  = $request->boolean('is_active', true);
+        $validated['sort_order'] = $validated['sort_order'] ?? Service::max('sort_order') + 1;
+
+        Service::create($validated);
+        return redirect()->route('admin.services')->with('success', 'Service ajouté avec succès.');
+    }
+
+    public function editService(Service $service): View
+    {
+        return view('admin.services.edit', compact('service'));
+    }
+
+    public function updateService(Request $request, Service $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'title'       => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'max:1000'],
+            'icon_svg'    => ['nullable', 'string'],
+            'color'       => ['required', 'in:primary,secondary'],
+            'tags'        => ['nullable', 'string'],
+            'sort_order'  => ['nullable', 'integer', 'min:0'],
+            'is_active'   => ['nullable', 'boolean'],
+        ]);
+
+        $validated['tags']      = $validated['tags']
+            ? array_map('trim', explode(',', $validated['tags']))
+            : [];
+        $validated['is_active'] = $request->boolean('is_active');
+
+        $service->update($validated);
+        return redirect()->route('admin.services')->with('success', 'Service mis à jour.');
+    }
+
+    public function deleteService(Service $service): RedirectResponse
+    {
+        $service->delete();
+        return back()->with('success', 'Service supprimé.');
     }
 }

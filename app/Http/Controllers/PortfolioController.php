@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewContactMessage;
 use App\Models\Project;
+use App\Models\Service;
 use App\Models\Skill;
 use App\Models\TimelineEntry;
 use App\Models\User;
@@ -37,13 +38,14 @@ class PortfolioController extends Controller
         $skills    = Skill::all()->groupBy('category');
         $assets    = PublicDocument::all()->groupBy('type');
         $timeline  = TimelineEntry::orderBy('sort_order')->orderBy('id')->get();
+        $services  = Service::where('is_active', true)->orderBy('sort_order')->get();
         $stats     = [
             'views'  => $analytics->getTotalViews(),
             'unique' => $analytics->getTotalUniqueVisits(),
         ];
         $adminUser = User::first();
 
-        return view('welcome', compact('projects', 'skills', 'stats', 'adminUser', 'assets', 'timeline'));
+        return view('welcome', compact('projects', 'skills', 'stats', 'adminUser', 'assets', 'timeline', 'services'));
     }
 
     public function sendContact(Request $request): JsonResponse

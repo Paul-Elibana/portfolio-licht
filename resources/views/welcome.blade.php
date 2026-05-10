@@ -535,40 +535,24 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-6">
-            @foreach([
-                [
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>',
-                    'title' => 'Développement Full-Stack',
-                    'desc' => 'Conception et développement d\'applications web complètes, de la base de données à l\'interface utilisateur. Expertise Laravel, PHP, MySQL, Vue.js et API REST.',
-                    'tags' => ['Laravel', 'PHP', 'Vue.js', 'MySQL'],
-                    'color' => 'primary',
-                ],
-                [
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>',
-                    'title' => 'Design UI/UX Moderne',
-                    'desc' => 'Création d\'interfaces utilisateurs soignées, intuitives et accessibles. Du wireframe à la mise en production, avec un focus sur l\'expérience utilisateur.',
-                    'tags' => ['Figma', 'Tailwind', 'Responsive'],
-                    'color' => 'secondary',
-                ],
-                [
-                    'icon' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
-                    'title' => 'Conseil & Architecture',
-                    'desc' => 'Audit technique de vos projets existants, recommandations d\'architecture, optimisation des performances et accompagnement dans vos choix technologiques.',
-                    'tags' => ['Audit', 'Optimisation', 'Conseil'],
-                    'color' => 'primary',
-                ],
-            ] as $i => $service)
+            @foreach($services as $i => $service)
                 <div class="service-card section-reveal" data-delay="{{ $i * 100 }}">
-                    <div class="w-14 h-14 rounded-2xl bg-accent-{{ $service['color'] }}/10 border border-accent-{{ $service['color'] }}/20 flex items-center justify-center mb-6">
-                        <svg class="w-7 h-7 text-accent-{{ $service['color'] }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">{!! $service['icon'] !!}</svg>
+                    <div class="w-14 h-14 rounded-2xl bg-accent-{{ $service->color }}/10 border border-accent-{{ $service->color }}/20 flex items-center justify-center mb-6">
+                        @if($service->icon_svg)
+                            <svg class="w-7 h-7 text-accent-{{ $service->color }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">{!! $service->icon_svg !!}</svg>
+                        @else
+                            <span class="text-2xl">🛠</span>
+                        @endif
                     </div>
-                    <h3 class="text-xl font-bold mb-3 text-slate-100">{{ $service['title'] }}</h3>
-                    <p class="text-sm text-slate-400 leading-relaxed mb-5">{{ $service['desc'] }}</p>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($service['tags'] as $tag)
-                            <x-badge variant="{{ $service['color'] }}">{{ $tag }}</x-badge>
-                        @endforeach
-                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-100">{{ $service->title }}</h3>
+                    <p class="text-sm text-slate-400 leading-relaxed mb-5">{{ $service->description }}</p>
+                    @if($service->tags)
+                        <div class="flex flex-wrap gap-2">
+                            @foreach($service->tags as $tag)
+                                <x-badge variant="{{ $service->color }}">{{ $tag }}</x-badge>
+                            @endforeach
+                        </div>
+                    @endif
                 </div>
             @endforeach
         </div>
