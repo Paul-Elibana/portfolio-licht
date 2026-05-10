@@ -61,13 +61,11 @@
                     </div>
                     <p class="text-[10px] text-slate-600 leading-relaxed">JPG, PNG, WEBP · Max 3 Mo</p>
                     @if($user->profile_photo)
-                        <form action="{{ route('admin.profile.photo.delete') }}" method="POST"
-                              onsubmit="return confirm('Supprimer la photo de profil ?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="text-[10px] text-red-400 hover:text-red-300 transition-colors underline">
-                                Supprimer la photo
-                            </button>
-                        </form>
+                        <button type="button"
+                                onclick="if(confirm('Supprimer la photo de profil ?')) document.getElementById('delete-photo-form').submit()"
+                                class="text-[10px] text-red-400 hover:text-red-300 transition-colors underline">
+                            Supprimer la photo
+                        </button>
                     @endif
                     @error('profile_photo') <p class="text-red-400 text-xs">{{ $message }}</p> @enderror
                 </div>
@@ -179,6 +177,12 @@
                 Enregistrer toutes les modifications
             </button>
         </div>
+    </form>
+
+    {{-- Standalone form for photo deletion (outside main form to avoid nesting) --}}
+    <form id="delete-photo-form" action="{{ route('admin.profile.photo.delete') }}" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 
