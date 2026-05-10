@@ -20,14 +20,14 @@ class DatabaseSeeder extends Seeder
         );
 
         $skills = [
-            ['name' => 'Laravel',      'category' => 'Backend',  'level' => 90],
-            ['name' => 'PHP 8.2',      'category' => 'Backend',  'level' => 85],
-            ['name' => 'MySQL',        'category' => 'Backend',  'level' => 80],
-            ['name' => 'Tailwind CSS', 'category' => 'Frontend', 'level' => 92],
-            ['name' => 'Vue.js',       'category' => 'Frontend', 'level' => 75],
-            ['name' => 'JavaScript',   'category' => 'Frontend', 'level' => 82],
-            ['name' => 'Git',          'category' => 'Tools',    'level' => 85],
-            ['name' => 'Vite',         'category' => 'Tools',    'level' => 78],
+            ['name' => 'Laravel',      'category' => 'Backend'],
+            ['name' => 'PHP 8.2',      'category' => 'Backend'],
+            ['name' => 'MySQL',        'category' => 'Backend'],
+            ['name' => 'Tailwind CSS', 'category' => 'Frontend'],
+            ['name' => 'Vue.js',       'category' => 'Frontend'],
+            ['name' => 'JavaScript',   'category' => 'Frontend'],
+            ['name' => 'Git',          'category' => 'Tools'],
+            ['name' => 'Vite',         'category' => 'Tools'],
         ];
 
         foreach ($skills as $skill) {
